@@ -11,8 +11,22 @@
  * Learn more at https://developers.cloudflare.com/workers/
  */
 
+// TODO: Move this to a config file or smt
+let originSource = "http://localhost:3000/images"
+
 export default {
 	async fetch(request, env, ctx): Promise<Response> {
-		return new Response("Hello World!");
+		const url = new URL(request.url);
+		const originUrl = `${originSource}${url.pathname}${url.search}`;
+
+		const originResponse = await fetch(originUrl, {
+			method: request.method,
+			headers: request.headers,
+		});
+
+		return new Response(originResponse.body, {
+			status: originResponse.status,
+			headers: originResponse.headers,
+		});
 	},
 } satisfies ExportedHandler<Env>;
