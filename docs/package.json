@@ -9,9 +9,11 @@
     "dev": "astro dev",
     "build": "astro build",
     "preview": "astro preview",
-    "astro": "astro"
+    "astro": "astro",
+    "cf:dev": "wrangler dev"
   },
   "dependencies": {
+    "@astrojs/cloudflare": "^13.1.8",
     "astro": "^6.1.5"
   }
 }
