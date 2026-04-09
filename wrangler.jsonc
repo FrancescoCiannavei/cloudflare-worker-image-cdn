@@ -13,12 +13,12 @@
 	"vars": {
 		"PROXY_ORIGINAL_URL": "http://localhost:3000/images"
 	},
-	// "r2_buckets": [
-	// 	{
-	// 		"binding": "CDN_IMAGES",
-	// 		"bucket_name": "cdn-images"
-	// 	}
-	// ],
+	"r2_buckets": [
+		{
+			"binding": "WORKER_CDN_IMAGES",
+			"bucket_name": "worker-cdn-images"
+		}
+	],
 	"upload_source_maps": true,
 	"compatibility_flags": [
 		"nodejs_compat"
