@@ -22,6 +22,9 @@ const { title = "Worker Image CDN" } = Astro.props;
 		<Sidebar />
 		<main>
 			<slot />
+			<footer>
+				Built by <a href="https://github.com/FrancescoCiannavei" target="_blank" rel="noopener">Francesco Ciannavei</a>
+			</footer>
 		</main>
 	</body>
 </html>
@@ -34,5 +37,22 @@ const { title = "Worker Image CDN" } = Astro.props;
 		margin-top: $navHeight;
 		padding: 40px 48px;
 		max-width: 800px;
+	}
+
+	footer {
+		margin-top: 60px;
+		padding-top: 20px;
+		border-top: 1px solid $borderCol;
+		font-size: 0.8rem;
+		color: $textSecondary;
+
+		a {
+			color: $textSecondary;
+			text-decoration: underline;
+
+			&:hover {
+				color: #fff;
+			}
+		}
 	}
 </style>
