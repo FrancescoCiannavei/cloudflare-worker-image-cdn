@@ -23,10 +23,12 @@ export function getContentType(format: ImageFormat): string {
 export async function convertImage(
 	imageData: ArrayBuffer,
 	format: ImageFormat,
+	quality = 100,
 ): Promise<Uint8Array> {
 	const result = await optimizeImage({
 		image: new Uint8Array(imageData),
 		format,
+		quality,
 	});
 	return result.data;
 }

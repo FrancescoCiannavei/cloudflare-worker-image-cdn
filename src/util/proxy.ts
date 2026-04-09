@@ -41,6 +41,7 @@ export async function proxyRequest(
 
 	const width = url.searchParams.get("w") ? Number(url.searchParams.get("w")) : undefined;
 	const height = url.searchParams.get("h") ? Number(url.searchParams.get("h")) : undefined;
+	const quality = url.searchParams.get("quality") ? Math.min(100, Math.max(1, Number(url.searchParams.get("quality")))) : undefined;
 
 	let imageData = await originResponse.arrayBuffer();
 
@@ -48,7 +49,7 @@ export async function proxyRequest(
 		imageData = (await resizeImage(imageData, width, height)).buffer as ArrayBuffer;
 	}
 
-	const converted = await convertImage(imageData, format);
+	const converted = await convertImage(imageData, format, quality);
 
 	return new Response(converted, {
 		status: 200,
