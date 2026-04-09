@@ -1,0 +1,69 @@
+---
+const currentPath = Astro.url.pathname;
+---
+
+<header class="navbar">
+	<a href="/" class="logo">
+		<span class="logo-icon">CDN</span>
+		<span class="logo-text">Worker Image CDN</span>
+	</a>
+	<nav>
+		<a href="https://github.com/francescociannavei/cloudflare-worker-image-cdn" target="_blank" rel="noopener">
+			GitHub
+		</a>
+	</nav>
+</header>
+
+<style lang="scss">
+	@use "../style/vars" as *;
+
+	.navbar {
+		position: fixed;
+		top: 0;
+		left: 0;
+		right: 0;
+		height: $navHeight;
+		background: rgba($bgDark, 0.8);
+		backdrop-filter: blur(12px);
+		border-bottom: 1px solid $borderCol;
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		padding: 0 $siteSpacing;
+		z-index: 100;
+	}
+
+	.logo {
+		display: flex;
+		align-items: center;
+		gap: 10px;
+		text-decoration: none;
+	}
+
+	.logo-icon {
+		background: $mainCol;
+		color: #fff;
+		font-weight: 700;
+		font-size: 0.75rem;
+		padding: 4px 8px;
+		border-radius: 6px;
+		letter-spacing: 0.05em;
+	}
+
+	.logo-text {
+		color: #fff;
+		font-weight: 600;
+		font-size: 1rem;
+	}
+
+	nav a {
+		color: $textSecondary;
+		font-size: 0.875rem;
+		text-decoration: none;
+		transition: color 0.15s;
+
+		&:hover {
+			color: #fff;
+		}
+	}
+</style>

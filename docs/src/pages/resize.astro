@@ -1,0 +1,44 @@
+---
+import Layout from "../layouts/Layout.astro";
+---
+
+<Layout title="Resizing - Worker Image CDN">
+	<h1>Resizing</h1>
+	<p>Resize images on the fly using the <code>w</code> and <code>h</code> query parameters. Aspect ratio is always preserved and images are never upscaled.</p>
+
+	<h2>Parameters</h2>
+	<table>
+		<thead>
+			<tr>
+				<th>Parameter</th>
+				<th>Description</th>
+				<th>Example</th>
+			</tr>
+		</thead>
+		<tbody>
+			<tr>
+				<td><code>w</code></td>
+				<td>Target width in pixels</td>
+				<td><code>?w=800</code></td>
+			</tr>
+			<tr>
+				<td><code>h</code></td>
+				<td>Target height in pixels</td>
+				<td><code>?h=600</code></td>
+			</tr>
+		</tbody>
+	</table>
+
+	<h2>Behavior</h2>
+	<ul class="content-list">
+		<li><strong>Width only</strong> (<code>?w=800</code>) — height is calculated to preserve aspect ratio</li>
+		<li><strong>Height only</strong> (<code>?h=600</code>) — width is calculated to preserve aspect ratio</li>
+		<li><strong>Both</strong> (<code>?w=800&h=600</code>) — uses whichever dimension results in the larger output (contain behavior)</li>
+		<li><strong>No params</strong> — the image is served at its original dimensions</li>
+	</ul>
+
+	<h2>Examples</h2>
+	<pre><code>/photo.jpg?w=400
+/photo.jpg?h=300
+/photo.jpg?w=800&h=600</code></pre>
+</Layout>

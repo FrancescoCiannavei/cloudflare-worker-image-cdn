@@ -1,0 +1,29 @@
+---
+import Layout from "../layouts/Layout.astro";
+---
+
+<Layout title="Caching - Worker Image CDN">
+	<h1>Caching</h1>
+	<p>Transformed images are cached in Cloudflare R2 so subsequent identical requests skip the origin fetch and image processing entirely.</p>
+
+	<h2>Cache key</h2>
+	<p>The cache key is built from the output format, URL path, and query string:</p>
+	<pre><code>{`{format}{pathname}{search}
+
+// Example:
+avif/photos/hero.jpg?w=800&quality=80`}</code></pre>
+
+	<h2>Cache behavior</h2>
+	<ul class="content-list">
+		<li><strong>MISS</strong> — image is fetched from origin, transformed, stored in R2, and served</li>
+		<li><strong>HIT</strong> — image is served directly from R2, no origin fetch or processing</li>
+	</ul>
+
+	<h2>Observability</h2>
+	<p>Every response includes an <code>X-Cache</code> header:</p>
+	<pre><code>X-Cache: HIT   // served from R2
+X-Cache: MISS  // fetched and processed from origin</code></pre>
+
+	<h2>Cache duration</h2>
+	<p>Cached responses include <code>Cache-Control: public, max-age=86400</code> (24 hours).</p>
+</Layout>

@@ -1,0 +1,40 @@
+---
+import Layout from "../layouts/Layout.astro";
+---
+
+<Layout title="Quality - Worker Image CDN">
+	<h1>Quality</h1>
+	<p>Control the output quality of converted images using the <code>quality</code> query parameter.</p>
+
+	<h2>Parameter</h2>
+	<table>
+		<thead>
+			<tr>
+				<th>Parameter</th>
+				<th>Range</th>
+				<th>Default</th>
+				<th>Example</th>
+			</tr>
+		</thead>
+		<tbody>
+			<tr>
+				<td><code>quality</code></td>
+				<td>1 - 100</td>
+				<td>100</td>
+				<td><code>?quality=80</code></td>
+			</tr>
+		</tbody>
+	</table>
+
+	<h2>How it works</h2>
+	<ul class="content-list">
+		<li>Quality is applied during format conversion (AVIF/WebP)</li>
+		<li>Lower values produce smaller files with some visual loss</li>
+		<li>Values are clamped between 1 and 100</li>
+		<li>When no <code>quality</code> param is provided, the default is <strong>100</strong> (no quality reduction)</li>
+	</ul>
+
+	<h2>Combining with other params</h2>
+	<pre><code>/photo.jpg?w=800&quality=80
+/photo.jpg?w=400&h=300&quality=60</code></pre>
+</Layout>

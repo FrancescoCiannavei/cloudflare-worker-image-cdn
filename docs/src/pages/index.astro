@@ -1,11 +1,33 @@
 ---
-import Welcome from '../components/Welcome.astro';
-import Layout from '../layouts/Layout.astro';
-
-// Welcome to Astro! Wondering what to do next? Check out the Astro documentation at https://docs.astro.build
-// Don't want to use any of this? Delete everything in this file, the `assets`, `components`, and `layouts` directories, and start fresh.
+import Layout from "../layouts/Layout.astro";
 ---
 
-<Layout>
-	<Welcome />
+<Layout title="Introduction - Worker Image CDN">
+	<h1>Worker Image CDN</h1>
+	<p>A Cloudflare Worker that acts as an image CDN proxy. It fetches images from an origin server, automatically converts them to modern formats, resizes on the fly, and caches the results in R2.</p>
+
+	<h2>Features</h2>
+	<ul class="content-list">
+		<li><strong>Automatic format conversion</strong> — Serves AVIF or WebP based on the browser's <code>Accept</code> header</li>
+		<li><strong>On-the-fly resizing</strong> — Resize via query parameters, preserving aspect ratio</li>
+		<li><strong>Quality control</strong> — Adjust output quality with <code>?quality=80</code></li>
+		<li><strong>R2 caching</strong> — Transformed images are cached in Cloudflare R2</li>
+		<li><strong>SVG passthrough</strong> — SVGs are served as-is without conversion</li>
+		<li><strong>Cache observability</strong> — <code>X-Cache: HIT/MISS</code> header</li>
+	</ul>
+
+	<h2>How it works</h2>
+	<pre><code>Request → Check R2 cache → [HIT]  → Serve cached image
+                        → [MISS] → Fetch from origin
+                                  → Resize (if requested)
+                                  → Convert to AVIF/WebP
+                                  → Store in R2
+                                  → Serve image</code></pre>
+
+	<h2>Quick start</h2>
+	<pre><code>npm install
+npx wrangler r2 bucket create worker-cdn-images
+npm run dev</code></pre>
+	<p>Then request an image:</p>
+	<pre><code>http://localhost:8787/photo.jpg?w=800&quality=80</code></pre>
 </Layout>

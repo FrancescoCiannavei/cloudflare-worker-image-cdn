@@ -1,0 +1,38 @@
+---
+import Layout from "../layouts/Layout.astro";
+---
+
+<Layout title="Setup - Worker Image CDN">
+	<h1>Setup</h1>
+
+	<h2>Prerequisites</h2>
+	<ul class="content-list">
+		<li><a href="https://nodejs.org/">Node.js</a> v18 or later</li>
+		<li>A <a href="https://dash.cloudflare.com/sign-up">Cloudflare account</a></li>
+	</ul>
+
+	<h2>Installation</h2>
+	<pre><code>npm install</code></pre>
+
+	<h2>Configuration</h2>
+	<p>Edit <code>wrangler.jsonc</code> to set your origin server URL:</p>
+	<pre><code>{`"vars": {
+    "PROXY_ORIGINAL_URL": "https://your-origin.com/images"
+}`}</code></pre>
+
+	<h2>Create the R2 bucket</h2>
+	<pre><code>npx wrangler r2 bucket create worker-cdn-images</code></pre>
+
+	<h2>Generate types</h2>
+	<pre><code>npx wrangler types</code></pre>
+
+	<h2>Local development</h2>
+	<p>Start the dev origin server:</p>
+	<pre><code>cd server && npm install && node index.js</code></pre>
+	<p>In another terminal, start the worker:</p>
+	<pre><code>npm run dev</code></pre>
+	<p>The worker runs at <code>http://localhost:8787</code>.</p>
+
+	<h2>Deploy</h2>
+	<pre><code>npx wrangler deploy</code></pre>
+</Layout>

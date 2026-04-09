@@ -1,0 +1,95 @@
+---
+const currentPath = Astro.url.pathname;
+
+const sections = [
+	{
+		title: "Getting Started",
+		links: [
+			{ label: "Introduction", href: "/" },
+			{ label: "Setup", href: "/setup" },
+		],
+	},
+	{
+		title: "Features",
+		links: [
+			{ label: "Resizing", href: "/resize" },
+			{ label: "Quality", href: "/quality" },
+			{ label: "Caching", href: "/cache" },
+		],
+	},
+];
+---
+
+<aside class="sidebar">
+	{sections.map((section) => (
+		<div class="section">
+			<span class="section-title">{section.title}</span>
+			<ul>
+				{section.links.map((link) => (
+					<li>
+						<a href={link.href} class:list={[{ active: currentPath === link.href }]}>
+							{link.label}
+						</a>
+					</li>
+				))}
+			</ul>
+		</div>
+	))}
+</aside>
+
+<style lang="scss">
+	@use "../style/vars" as *;
+
+	.sidebar {
+		position: fixed;
+		top: $navHeight;
+		left: 0;
+		bottom: 0;
+		width: $sidebarWidth;
+		background: $bgSidebar;
+		border-right: 1px solid $borderCol;
+		padding: 24px 16px;
+		overflow-y: auto;
+	}
+
+	.section {
+		margin-bottom: 28px;
+	}
+
+	.section-title {
+		display: block;
+		font-size: 0.75rem;
+		font-weight: 600;
+		text-transform: uppercase;
+		letter-spacing: 0.08em;
+		color: $textSecondary;
+		margin-bottom: 8px;
+		padding: 0 12px;
+	}
+
+	ul {
+		display: flex;
+		flex-direction: column;
+		gap: 2px;
+	}
+
+	a {
+		display: block;
+		padding: 8px 12px;
+		border-radius: 6px;
+		color: $textSecondary;
+		font-size: 0.875rem;
+		text-decoration: none;
+		transition: all 0.15s;
+
+		&:hover {
+			color: #fff;
+			background: rgba(#fff, 0.05);
+		}
+
+		&.active {
+			color: $mainCol;
+			background: rgba($mainCol, 0.1);
+		}
+	}
+</style>
