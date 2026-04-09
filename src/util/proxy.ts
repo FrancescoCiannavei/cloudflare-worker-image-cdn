@@ -27,7 +27,7 @@ export async function proxyRequest(
 	}
 
 	const contentType = originResponse.headers.get("content-type") || "";
-	if (!contentType.startsWith("image/")) {
+	if (!contentType.startsWith("image/") || contentType.includes("svg")) {
 		return passthrough(originResponse);
 	}
 
