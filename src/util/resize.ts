@@ -10,10 +10,10 @@ export async function resizeImage(
 	targetWidth?: number,
 	targetHeight?: number,
 ): Promise<Uint8Array> {
-	// Get original dimensions
-	const probe = await optimizeImage({
-		image: new Uint8Array(imageData),
-	});
+	const image = new Uint8Array(imageData);
+
+	// Get original dimensions via probe
+	const probe = await optimizeImage({ image });
 
 	const origW = probe.originalWidth;
 	const origH = probe.originalHeight;
@@ -25,7 +25,7 @@ export async function resizeImage(
 	}
 
 	const result = await optimizeImage({
-		image: new Uint8Array(imageData),
+		image,
 		width,
 		height,
 		fit: "contain",
