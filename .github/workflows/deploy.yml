@@ -2,7 +2,7 @@ name: Deploy
 
 on:
   push:
-	# Runs on every push
+    # Runs on every push
 	# TODO: decomment this once I fix all the bugs and write all the docs and add all the features :D
     # branches:
     #   - main
