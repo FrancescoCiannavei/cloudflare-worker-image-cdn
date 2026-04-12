@@ -73,11 +73,22 @@ export async function proxyRequest(
 	// Get image data as ArrayBuffer
 	const imageData = await originResponse.arrayBuffer();
 
-	// Probe source dimensions and re-evaluate format — if the source is too
-	// large for AVIF encoding on a 128MB Worker, downgrade to WebP.
+	// Probe source dimensions and resolve the target (post-resize) dimensions.
+	// The encoder works on the resized raster, so AVIF feasibility is determined
+	// by the target size — not the source.
 	const dims = getImageDimensions(imageData);
+	let targetW: number | undefined;
+	let targetH: number | undefined;
 	if (dims) {
-		format = getBestFormat(accept, dims);
+		if (width || height) {
+			const resized = computeDimensions(dims.width, dims.height, width, height);
+			targetW = resized.width;
+			targetH = resized.height;
+		} else {
+			targetW = dims.width;
+			targetH = dims.height;
+		}
+		format = getBestFormat(accept, { width: targetW, height: targetH });
 	}
 	if (!format) {
 		return passthrough(new Response(imageData, {
@@ -93,14 +104,8 @@ export async function proxyRequest(
 		speed: 10,
 	};
 
-	// Add resize dimensions if requested (only downscale, never upscale)
-	if ((width || height) && dims) {
-		const { width: targetW, height: targetH } = computeDimensions(
-			dims.width,
-			dims.height,
-			width,
-			height,
-		);
+	// Apply resize if it would actually downscale (never upscale)
+	if (dims && targetW !== undefined && targetH !== undefined) {
 		if (targetW < dims.width || targetH < dims.height) {
 			options.width = targetW;
 			options.height = targetH;
