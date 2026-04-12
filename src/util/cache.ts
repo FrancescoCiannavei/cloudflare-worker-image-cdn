@@ -14,9 +14,6 @@ export async function getCachedImage(
 	url: URL,
 	format: ImageFormat,
 ): Promise<{ data: ReadableStream; contentType: string } | null> {
-	// Disabled for now
-	// TODO: Remove this line
-	return null;
 	const key = buildCacheKey(url, format);
 	const object = await bucket.get(key);
 
