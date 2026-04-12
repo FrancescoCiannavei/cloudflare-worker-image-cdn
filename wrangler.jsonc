@@ -11,23 +11,22 @@
 		"enabled": true
 	},
 	"vars": {
-		"PROXY_ORIGINAL_URL": "http://localhost:3000/images"
+		"PROXY_ORIGINAL_URL": "https://docs-cloudflare-cdn.ciannavei.dev/"
 	},
 	"r2_buckets": [
 		{
 			"binding": "WORKER_CDN_IMAGES",
-			"bucket_name": "worker-cdn-images"
+			"bucket_name": "worker-cdn-images",
+			"preview_bucket_name": "worker-cdn-images-local"
 		}
 	],
 	"upload_source_maps": true,
 	"compatibility_flags": [
 		"nodejs_compat"
-	]
-	/**
-	 * Smart Placement
-	 * https://developers.cloudflare.com/workers/configuration/smart-placement/#smart-placement
-	 */
-	// "placement": {  "mode": "smart" }
+	],
+	"placement": {
+		"mode": "smart"
+	}
 	/**
 	 * Bindings
 	 * Bindings allow your Worker to interact with resources on the Cloudflare Developer Platform, including

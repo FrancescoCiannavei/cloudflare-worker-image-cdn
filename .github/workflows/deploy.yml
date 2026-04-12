@@ -2,8 +2,10 @@ name: Deploy
 
 on:
   push:
-    branches:
-      - main
+    # Runs on every push
+	# TODO: decomment this once I fix all the bugs and write all the docs and add all the features :D
+    # branches:
+    #   - main
 
 jobs:
   deploy-docs:
