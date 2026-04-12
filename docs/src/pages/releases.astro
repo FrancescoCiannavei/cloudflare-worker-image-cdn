@@ -23,7 +23,11 @@ try {
 			Accept: "application/vnd.github+json",
 			"User-Agent": "cloudflare-worker-image-cdn-docs",
 		},
-	});
+		cf: {
+			cacheTtl: 3600,
+			cacheEverything: true,
+		},
+	} as RequestInit);
 	if (!res.ok) {
 		fetchError = `GitHub API returned ${res.status}`;
 	} else {
