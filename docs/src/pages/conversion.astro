@@ -1,0 +1,74 @@
+---
+import Layout from "../layouts/Layout.astro";
+---
+
+<Layout title="Quality - Worker Image CDN">
+	<h1>Conversion</h1>
+	<p>Lorem</p>
+
+	<h2>Comparison</h2>
+	<img-comparison-slider>
+		<img slot="first" src="https://demo-cloudflare-cdn.ciannavei.dev/images/examples/jojo-sbr-gyro.png" alt="Quality 100" />
+		<img slot="second" src="https://docs-cloudflare-cdn.ciannavei.dev/images/examples/jojo-sbr-gyro.png" alt="Quality 10" />
+	</img-comparison-slider>
+	<div class="comparison-labels">
+		<span>Original (png): 1600Kb</span>
+		<span>Converted (avif): 400Kb</span>
+	</div>
+
+	<h2>Parameter</h2>
+	<table>
+		<thead>
+			<tr>
+				<th>Parameter</th>
+				<th>Range</th>
+				<th>Default</th>
+				<th>Example</th>
+			</tr>
+		</thead>
+		<tbody>
+			<tr>
+				<td><code>quality</code></td>
+				<td>1 - 100</td>
+				<td>100</td>
+				<td><code>?quality=80</code></td>
+			</tr>
+		</tbody>
+	</table>
+
+	<h2>How it works</h2>
+	<ul class="content-list">
+		<li>Quality is applied during format conversion (AVIF/WebP)</li>
+		<li>Lower values produce smaller files with some visual loss</li>
+		<li>Values are clamped between 1 and 100</li>
+		<li>When no <code>quality</code> param is provided, the default is <strong>100</strong> (no quality reduction)</li>
+	</ul>
+
+	<h2>Combining with other params</h2>
+	<pre><code>/photo.jpg?w=800&quality=80
+/photo.jpg?w=400&h=300&quality=60</code></pre>
+</Layout>
+
+<script>
+	import "img-comparison-slider";
+</script>
+
+<style lang="scss">
+	@use "../style/vars" as *;
+
+	img-comparison-slider {
+		width: 100%;
+		border-radius: 8px;
+		border: 1px solid $borderCol;
+		--divider-color: #{$mainCol};
+		--default-handle-color: #{$mainCol};
+	}
+
+	.comparison-labels {
+		display: flex;
+		justify-content: space-between;
+		margin-top: 8px;
+		font-size: 0.8rem;
+		color: $textSecondary;
+	}
+</style>
