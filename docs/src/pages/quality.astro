@@ -6,6 +6,16 @@ import Layout from "../layouts/Layout.astro";
 	<h1>Quality</h1>
 	<p>Control the output quality of converted images using the <code>quality</code> query parameter.</p>
 
+	<h2>Comparison</h2>
+	<img-comparison-slider>
+		<img slot="first" src="https://demo-cloudflare-cdn.ciannavei.dev/images/examples/john-cena.jpg?w=720&quality=100" alt="Quality 100" />
+		<img slot="second" src="https://demo-cloudflare-cdn.ciannavei.dev/images/examples/john-cena.jpg?w=720&quality=10" alt="Quality 10" />
+	</img-comparison-slider>
+	<div class="comparison-labels">
+		<span>Quality 100</span>
+		<span>Quality 10</span>
+	</div>
+
 	<h2>Parameter</h2>
 	<table>
 		<thead>
@@ -38,3 +48,27 @@ import Layout from "../layouts/Layout.astro";
 	<pre><code>/photo.jpg?w=800&quality=80
 /photo.jpg?w=400&h=300&quality=60</code></pre>
 </Layout>
+
+<script>
+	import "img-comparison-slider";
+</script>
+
+<style lang="scss">
+	@use "../style/vars" as *;
+
+	img-comparison-slider {
+		width: 100%;
+		border-radius: 8px;
+		border: 1px solid $borderCol;
+		--divider-color: #{$mainCol};
+		--default-handle-color: #{$mainCol};
+	}
+
+	.comparison-labels {
+		display: flex;
+		justify-content: space-between;
+		margin-top: 8px;
+		font-size: 0.8rem;
+		color: $textSecondary;
+	}
+</style>

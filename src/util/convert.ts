@@ -5,8 +5,23 @@ import { optimizeImage } from "wasm-image-optimization/workerd";
 
 export type ImageFormat = "avif" | "webp";
 
-export function getBestFormat(acceptHeader: string): ImageFormat | null {
-	if (acceptHeader.includes("image/avif")) return "avif";
+// Empirically-derived ceiling for AVIF encoding on a 128MB Worker.
+// aom peak ≈ pixel_count × ~13 bytes + ~20MB baseline; 5MP leaves headroom
+// for fragmentation and encoder variance.
+export const MAX_AVIF_PIXELS = 5_000_000;
+
+export function canEncodeAvif(width: number, height: number): boolean {
+	return width * height <= MAX_AVIF_PIXELS;
+}
+
+export function getBestFormat(
+	acceptHeader: string,
+	dimensions?: { width: number; height: number },
+): ImageFormat | null {
+	if (
+		acceptHeader.includes("image/avif")
+		&& (!dimensions || canEncodeAvif(dimensions.width, dimensions.height))
+	) return "avif";
 	if (acceptHeader.includes("image/webp")) return "webp";
 	return null;
 }

@@ -1,0 +1,123 @@
+---
+---
+
+<div id="wip-warning" class="wip-overlay">
+	<div class="wip-popup">
+		<h3>⚠ Warning</h3>
+		<p>The project is still WIP.<br />Please wait for the 1.0.0 release.</p>
+		<div class="wip-buttons">
+			<button id="wip-close">Close</button>
+			<a href="https://github.com/FrancescoCiannavei/cloudflare-worker-image-cdn/releases" target="_blank" rel="noopener" class="wip-releases-btn">Releases</a>
+		</div>
+	</div>
+</div>
+
+<script>
+	function getCookie(name: string): string | null {
+		const match = document.cookie.match(new RegExp(`(^| )${name}=([^;]+)`));
+		return match ? match[2] : null;
+	}
+
+	function setCookie(name: string, value: string, days: number) {
+		const expires = new Date(Date.now() + days * 864e5).toUTCString();
+		document.cookie = `${name}=${value}; expires=${expires}; path=/`;
+	}
+
+	const overlay = document.getElementById("wip-warning")!;
+	const closeBtn = document.getElementById("wip-close")!;
+
+	if (getCookie("wip_dismissed") === "1") {
+		overlay.remove();
+	} else {
+		overlay.classList.add("visible");
+	}
+
+	closeBtn.addEventListener("click", () => {
+		setCookie("wip_dismissed", "1", 30);
+		overlay.classList.remove("visible");
+		overlay.addEventListener("transitionend", () => overlay.remove());
+	});
+</script>
+
+<style lang="scss">
+	@use "../style/vars" as *;
+
+	.wip-overlay {
+		position: fixed;
+		inset: 0;
+		z-index: 9999;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		background: rgba(0, 0, 0, 0.7);
+		backdrop-filter: blur(4px);
+		opacity: 0;
+		pointer-events: none;
+		transition: opacity 0.25s ease;
+
+		&.visible {
+			opacity: 1;
+			pointer-events: auto;
+		}
+	}
+
+	.wip-popup {
+		background: $bgCard;
+		border: 1px solid $mainCol;
+		border-radius: 12px;
+		padding: 32px 40px;
+		max-width: 420px;
+		text-align: center;
+
+		h3 {
+			color: $mainCol;
+			font-size: 1.25rem;
+			margin-bottom: 12px;
+		}
+
+		p {
+			color: $textSecondary;
+			line-height: 1.6;
+			margin-bottom: 24px;
+		}
+
+		.wip-buttons {
+			display: flex;
+			gap: 12px;
+			justify-content: center;
+		}
+
+		button, .wip-releases-btn {
+			border-radius: 6px;
+			padding: 10px 28px;
+			font-family: $fontFamily;
+			font-size: 0.95rem;
+			font-weight: 700;
+			cursor: pointer;
+			transition: background 0.2s ease, border-color 0.2s ease;
+			text-decoration: none;
+			display: inline-block;
+		}
+
+		button {
+			background: $mainCol;
+			color: #fff;
+			border: none;
+
+			&:hover {
+				background: $mainColLight;
+			}
+		}
+
+		.wip-releases-btn {
+			background: transparent;
+			color: $textSecondary;
+			border: 1px solid $borderCol;
+
+			&:hover {
+				border-color: $mainCol;
+				color: #fff;
+			}
+		}
+	}
+</style>

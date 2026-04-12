@@ -1,8 +1,10 @@
 /**
  * Util to proxy requests to the origin server
  */
-import { getBestFormat, getContentType, convertImage } from "./convert";
-import { resizeImage } from "./resize";
+import { optimizeImage, type OptimizeParams } from "wasm-image-optimization/workerd";
+import { getBestFormat, getContentType, type ImageFormat } from "./convert";
+import { computeDimensions } from "./resize";
+import { getImageDimensions } from "./dimensions";
 import { getCachedImage, putCachedImage } from "./cache";
 
 function passthrough(response: Response): Response {
@@ -16,12 +18,13 @@ export async function proxyRequest(
 	request: Request,
 	originBaseUrl: string,
 	bucket: R2Bucket,
+	ctx: ExecutionContext,
 ): Promise<Response> {
 	const url = new URL(request.url);
 	const originUrl = `${originBaseUrl}${url.pathname}${url.search}`;
 
 	const accept = request.headers.get("accept") || "";
-	const format = getBestFormat(accept);
+	let format = getBestFormat(accept);
 
 	const width = url.searchParams.get("w") ? Number(url.searchParams.get("w")) : undefined;
 	const height = url.searchParams.get("h") ? Number(url.searchParams.get("h")) : undefined;
@@ -45,9 +48,13 @@ export async function proxyRequest(
 	}
 
 	// Cache miss — fetch from origin
+	const originHost = new URL(originUrl).host;
 	const originResponse = await fetch(originUrl, {
 		method: request.method,
-		headers: request.headers,
+		headers: {
+			...Object.fromEntries(request.headers),
+			Host: originHost,
+		},
 	});
 
 	if (!originResponse.ok) {
@@ -63,21 +70,73 @@ export async function proxyRequest(
 		return passthrough(originResponse);
 	}
 
-	let imageData = await originResponse.arrayBuffer();
+	// Get image data as ArrayBuffer
+	const imageData = await originResponse.arrayBuffer();
 
-	if (width || height) {
-		imageData = (await resizeImage(imageData, width, height)).buffer as ArrayBuffer;
+	// Probe source dimensions and resolve the target (post-resize) dimensions.
+	// The encoder works on the resized raster, so AVIF feasibility is determined
+	// by the target size — not the source.
+	const dims = getImageDimensions(imageData);
+	let targetW: number | undefined;
+	let targetH: number | undefined;
+	if (dims) {
+		if (width || height) {
+			const resized = computeDimensions(dims.width, dims.height, width, height);
+			targetW = resized.width;
+			targetH = resized.height;
+		} else {
+			targetW = dims.width;
+			targetH = dims.height;
+		}
+		format = getBestFormat(accept, { width: targetW, height: targetH });
+	}
+	if (!format) {
+		return passthrough(new Response(imageData, {
+			headers: { "Content-Type": contentType },
+		}));
 	}
 
-	const converted = await convertImage(imageData, format, quality);
+	// Build optimizeImage options
+	const options: OptimizeParams = {
+		image: imageData,
+		format,
+		quality,
+		speed: 10,
+	};
 
-	// Store in R2 cache
-	await putCachedImage(bucket, url, format, converted);
+	// Apply resize if it would actually downscale (never upscale)
+	if (dims && targetW !== undefined && targetH !== undefined) {
+		if (targetW < dims.width || targetH < dims.height) {
+			options.width = targetW;
+			options.height = targetH;
+		}
+	}
+
+	// Try requested format, fall back to WebP if AVIF blows memory
+	let converted: Uint8Array;
+	let outputFormat: ImageFormat = format;
+	try {
+		converted = (await optimizeImage(options)).data;
+	} catch {
+		if (format === "avif") {
+			outputFormat = "webp";
+			options.format = "webp";
+			options.speed = 10;
+			converted = (await optimizeImage(options)).data;
+		} else {
+			return passthrough(new Response(imageData, {
+				headers: { "Content-Type": contentType },
+			}));
+		}
+	}
+
+	// Store in R2 cache (non-blocking)
+	ctx.waitUntil(putCachedImage(bucket, url, outputFormat, converted));
 
 	return new Response(converted, {
 		status: 200,
 		headers: {
-			"Content-Type": getContentType(format),
+			"Content-Type": getContentType(outputFormat),
 			"Cache-Control": "public, max-age=86400",
 			"X-Cache": "MISS",
 		},
