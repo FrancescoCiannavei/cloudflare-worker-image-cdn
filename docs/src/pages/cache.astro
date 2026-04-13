@@ -12,18 +12,24 @@ import Layout from "../layouts/Layout.astro";
 
 // Example:
 avif/photos/hero.jpg?w=800&quality=80`}</code></pre>
+	<p>Because <a href="/steps">steps</a> snap query parameters to fixed values before cache lookup, similar requests like <code>?w=799</code> and <code>?w=801</code> resolve to the same cache key.</p>
 
 	<h2>Cache behavior</h2>
 	<ul class="content-list">
-		<li><strong>MISS</strong> — image is fetched from origin, transformed, stored in R2, and served</li>
 		<li><strong>HIT</strong> — image is served directly from R2, no origin fetch or processing</li>
+		<li><strong>MISS</strong> — image is fetched from origin, transformed, stored in R2, and served</li>
+		<li><strong>BYPASS</strong> — image processing failed; the original image is served unmodified</li>
 	</ul>
 
 	<h2>Observability</h2>
 	<p>Every response includes an <code>X-Cache</code> header:</p>
-	<pre><code>X-Cache: HIT   // served from R2
-X-Cache: MISS  // fetched and processed from origin</code></pre>
+	<pre><code>{`X-Cache: HIT     // served from R2
+X-Cache: MISS    // fetched and processed from origin
+X-Cache: BYPASS  // processing failed, original served`}</code></pre>
+
+	<h2>Cache storage</h2>
+	<p>Cache writes are <strong>non-blocking</strong> — the response is sent to the client immediately, and the image is stored in R2 in the background. This keeps response times fast even on cache misses.</p>
 
 	<h2>Cache duration</h2>
-	<p>Cached responses include <code>Cache-Control: public, max-age=86400</code> (24 hours).</p>
+	<p>Cached responses include <code>Cache-Control: public, max-age=86400</code> (24 hours). This applies to both the R2-stored object and the browser cache header.</p>
 </Layout>
