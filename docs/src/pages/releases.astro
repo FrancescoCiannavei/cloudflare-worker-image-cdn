@@ -1,0 +1,199 @@
+---
+import Layout from "../layouts/Layout.astro";
+
+type Release = {
+	id: number;
+	name: string | null;
+	tag_name: string;
+	html_url: string;
+	published_at: string | null;
+	body: string | null;
+	prerelease: boolean;
+	draft: boolean;
+};
+
+const REPO = "FrancescoCiannavei/cloudflare-worker-image-cdn";
+
+let releases: Release[] = [];
+let fetchError: string | null = null;
+
+try {
+	const res = await fetch(`https://api.github.com/repos/${REPO}/releases?per_page=100`, {
+		headers: {
+			Accept: "application/vnd.github+json",
+			"User-Agent": "cloudflare-worker-image-cdn-docs",
+		},
+		cf: {
+			cacheTtl: 3600,
+			cacheEverything: true,
+		},
+	} as RequestInit);
+	if (!res.ok) {
+		fetchError = `GitHub API returned ${res.status}`;
+	} else {
+		const data = (await res.json()) as Release[];
+		releases = data.filter((r) => !r.draft);
+	}
+} catch (err) {
+	fetchError = err instanceof Error ? err.message : "Unknown error";
+}
+
+const dateFormatter = new Intl.DateTimeFormat("en-US", {
+	year: "numeric",
+	month: "long",
+	day: "numeric",
+});
+---
+
+<Layout title="Releases - Worker Image CDN">
+	<h1>Releases</h1>
+	<p>All published releases from the <a href={`https://github.com/${REPO}/releases`} target="_blank" rel="noopener">GitHub repository</a>.</p>
+
+	{fetchError && (
+		<div class="error">
+			Could not load releases: {fetchError}
+		</div>
+	)}
+
+	{!fetchError && releases.length === 0 && (
+		<p class="empty">No releases published yet.</p>
+	)}
+
+	{releases.length > 0 && (
+		<ul class="releases">
+			{releases.map((release) => (
+				<li class="release">
+					<div class="release-header">
+						<a href={release.html_url} target="_blank" rel="noopener" class="release-title">
+							{release.name || release.tag_name}
+						</a>
+						{release.prerelease && <span class="badge">pre-release</span>}
+					</div>
+					<div class="release-meta">
+						<code>{release.tag_name}</code>
+						{release.published_at && (
+							<span>
+								{dateFormatter.format(new Date(release.published_at))}
+							</span>
+						)}
+					</div>
+					{release.body && (
+						<pre class="release-body">{release.body}</pre>
+					)}
+					<a
+						class="deploy-button"
+						href={`https://deploy.workers.cloudflare.com/?url=https://github.com/${REPO}/tree/${release.tag_name}`}
+						target="_blank"
+						rel="noopener"
+					>
+						Deploy {release.tag_name} to Cloudflare Workers
+					</a>
+				</li>
+			))}
+		</ul>
+	)}
+</Layout>
+
+<style lang="scss">
+	@use "../style/vars" as *;
+
+	.releases {
+		display: flex;
+		flex-direction: column;
+		gap: 24px;
+		list-style: none;
+		padding: 0;
+		margin-top: 24px;
+	}
+
+	.release {
+		border: 1px solid $borderCol;
+		border-radius: 8px;
+		padding: 20px 24px;
+		background: rgba(#fff, 0.02);
+	}
+
+	.release-header {
+		display: flex;
+		align-items: center;
+		gap: 12px;
+		margin-bottom: 6px;
+	}
+
+	.release-title {
+		font-size: 1.25rem;
+		font-weight: 600;
+		color: #fff;
+		text-decoration: none;
+
+		&:hover {
+			color: $mainCol;
+		}
+	}
+
+	.badge {
+		font-size: 0.7rem;
+		text-transform: uppercase;
+		letter-spacing: 0.05em;
+		padding: 2px 8px;
+		border-radius: 4px;
+		background: rgba($mainCol, 0.15);
+		color: $mainCol;
+	}
+
+	.release-meta {
+		display: flex;
+		gap: 16px;
+		font-size: 0.8rem;
+		color: $textSecondary;
+		margin-bottom: 12px;
+
+		code {
+			font-family: inherit;
+		}
+	}
+
+	.deploy-button {
+		display: inline-block;
+		margin-top: 16px;
+		padding: 8px 16px;
+		border-radius: 6px;
+		background: $mainCol;
+		color: #000;
+		font-size: 0.8rem;
+		font-weight: 600;
+		text-decoration: none;
+		transition: opacity 0.15s;
+
+		&:hover {
+			opacity: 0.85;
+		}
+	}
+
+	.release-body {
+		margin: 0;
+		padding: 12px 16px;
+		background: rgba(#000, 0.25);
+		border-radius: 6px;
+		font-size: 0.85rem;
+		color: $textSecondary;
+		white-space: pre-wrap;
+		word-wrap: break-word;
+		font-family: inherit;
+		line-height: 1.5;
+	}
+
+	.error {
+		padding: 12px 16px;
+		border-radius: 6px;
+		background: rgba(red, 0.1);
+		border: 1px solid rgba(red, 0.3);
+		color: #ffb4b4;
+		font-size: 0.875rem;
+	}
+
+	.empty {
+		color: $textSecondary;
+		font-style: italic;
+	}
+</style>
