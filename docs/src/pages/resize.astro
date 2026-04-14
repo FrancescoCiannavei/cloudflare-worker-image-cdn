@@ -30,29 +30,67 @@ import Layout from "../layouts/Layout.astro";
 	</table>
 
 	<h2>Behavior</h2>
-	<ul class="content-list">
-		<li><strong>Width only</strong> (<code>?w=800</code>) — height is calculated to preserve aspect ratio</li>
-		<li><strong>Height only</strong> (<code>?h=600</code>) — width is calculated to preserve aspect ratio</li>
-		<li><strong>Both</strong> (<code>?w=800&h=600</code>) — uses whichever dimension results in the larger output (contain behavior)</li>
-		<li><strong>No params</strong> — the image is served at its original dimensions</li>
-	</ul>
+	<table>
+		<thead>
+			<tr>
+				<th>Parameters Provided</th>
+				<th>Result</th>
+			</tr>
+		</thead>
+		<tbody>
+			<tr>
+				<td><strong>Width only</strong> (<code>?w=800</code>)</td>
+				<td>Height is calculated to preserve aspect ratio</td>
+			</tr>
+			<tr>
+				<td><strong>Height only</strong> (<code>?h=600</code>)</td>
+				<td>Width is calculated to preserve aspect ratio</td>
+			</tr>
+			<tr>
+				<td><strong>Both</strong> (<code>?w=800&amp;h=600</code>)</td>
+				<td>Uses whichever dimension results in the larger output (contain behavior)</td>
+			</tr>
+			<tr>
+				<td><strong>No params</strong></td>
+				<td>The image is served at its original dimensions</td>
+			</tr>
+		</tbody>
+	</table>
 
 	<h2>No upscaling</h2>
 	<p>If the requested size is larger than the original image, the original dimensions are kept. The worker never upscales an image.</p>
 
 	<h2>Supported input formats</h2>
 	<p>Dimensions are read directly from the binary headers of the original image. The following formats are supported:</p>
-	<ul class="content-list">
-		<li><strong>PNG</strong> — dimensions from the IHDR chunk</li>
-		<li><strong>JPEG</strong> — dimensions from the SOF marker</li>
-		<li><strong>WebP</strong> — dimensions from VP8/VP8L frames</li>
-	</ul>
+	<table>
+		<thead>
+			<tr>
+				<th>Format</th>
+				<th>Metadata Read</th>
+			</tr>
+		</thead>
+		<tbody>
+			<tr>
+				<td><strong>PNG</strong></td>
+				<td>Dimensions from the IHDR chunk</td>
+			</tr>
+			<tr>
+				<td><strong>JPEG</strong></td>
+				<td>Dimensions from the SOF marker</td>
+			</tr>
+			<tr>
+				<td><strong>WebP</strong></td>
+				<td>Dimensions from VP8/VP8L frames</td>
+			</tr>
+		</tbody>
+	</table>
 	<p>If the format is unrecognized, the image is served without resizing.</p>
 
 	<h2>Step snapping</h2>
 	<p>Requested dimensions are snapped to the nearest <a href="/steps">size step</a> before processing. For example, <code>?w=500</code> snaps to <code>w=720</code> with the default step configuration.</p>
 
 	<h2>Examples</h2>
+	<img src="https://demo-cloudflare-cdn.ciannavei.dev/images/examples/jojo-dio.jpg?w=1080&quality=80" alt="Resizing example" style="max-width: 100%; border-radius: 8px; margin-bottom: 24px;" />
 	<pre><code>/photo.jpg?w=400
 /photo.jpg?h=300
 /photo.jpg?w=800&h=600</code></pre>
