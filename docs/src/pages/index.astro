@@ -7,14 +7,44 @@ import Layout from "../layouts/Layout.astro";
 	<p>A Cloudflare Worker that acts as an image CDN proxy. It fetches images from an origin server, automatically converts them to modern formats, resizes on the fly, and caches the results in R2.</p>
 
 	<h2>Features</h2>
-	<ul class="content-list">
-		<li><strong>Automatic format conversion</strong> — Serves AVIF or WebP based on the browser's <code>Accept</code> header</li>
-		<li><strong>On-the-fly resizing</strong> — Resize via query parameters, preserving aspect ratio</li>
-		<li><strong>Quality control</strong> — Adjust output quality with <code>?quality=80</code></li>
-		<li><strong>R2 caching</strong> — Transformed images are cached in Cloudflare R2</li>
-		<li><strong>SVG passthrough</strong> — SVGs are served as-is without conversion</li>
-		<li><strong>Cache observability</strong> — <code>X-Cache: HIT/MISS</code> header</li>
-	</ul>
+	<table>
+		<thead>
+			<tr>
+				<th>Feature</th>
+				<th>Description</th>
+			</tr>
+		</thead>
+		<tbody>
+			<tr>
+				<td><strong>Automatic format conversion</strong></td>
+				<td>Serves AVIF or WebP based on the browser's <code>Accept</code> header</td>
+			</tr>
+			<tr>
+				<td><strong>On-the-fly resizing</strong></td>
+				<td>Resize via query parameters, preserving aspect ratio</td>
+			</tr>
+			<tr>
+				<td><strong>Quality control</strong></td>
+				<td>Adjust output quality with <code>?quality=80</code></td>
+			</tr>
+			<tr>
+				<td><strong>R2 caching</strong></td>
+				<td>Transformed images are cached in Cloudflare R2</td>
+			</tr>
+			<tr>
+				<td><strong>Step snapping</strong></td>
+				<td>Dimensions and quality snap to configured steps for efficient caching</td>
+			</tr>
+			<tr>
+				<td><strong>SVG passthrough</strong></td>
+				<td>SVGs are served as-is without conversion</td>
+			</tr>
+			<tr>
+				<td><strong>Cache observability</strong></td>
+				<td><code>X-Cache: HIT/MISS</code> header</td>
+			</tr>
+		</tbody>
+	</table>
 
 	<h2>How it works</h2>
 	<pre><code>Request → Check R2 cache → [HIT]  → Serve cached image

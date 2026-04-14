@@ -2,7 +2,71 @@
 import Layout from "../layouts/Layout.astro";
 ---
 
-<Layout title="Quality - Worker Image CDN">
+<Layout title="Steps - Worker Image CDN">
 	<h1>Steps</h1>
-	<p>Lorem.</p>
+	<p>Steps snap requested dimensions and quality values to a predefined set of allowed values. This reduces the number of unique cache keys, so similar requests share the same cached variant instead of generating near-identical images.</p>
+
+	<h2>How it works</h2>
+	<p>When a request includes <code>w</code>, <code>h</code>, or <code>quality</code> parameters, each value is rounded <strong>up</strong> to the nearest step before the image is processed or looked up in cache.</p>
+	<pre><code>{`?w=500  → snaps to w=720
+?w=1000 → snaps to w=1080
+?quality=75 → snaps to quality=80`}</code></pre>
+
+	<h2>Step arrays</h2>
+	<p>Two separate step arrays control snapping for size and quality:</p>
+	<table>
+		<thead>
+			<tr>
+				<th>Variable</th>
+				<th>Applies to</th>
+				<th>Default</th>
+			</tr>
+		</thead>
+		<tbody>
+			<tr>
+				<td><code>STEPS_SIZE</code></td>
+				<td><code>w</code> and <code>h</code> parameters</td>
+				<td><code>[320, 480, 720, 1080, 1920, 2560, 3840]</code></td>
+			</tr>
+			<tr>
+				<td><code>STEPS_QUALITY</code></td>
+				<td><code>quality</code> parameter</td>
+				<td><code>[10, 20, 30, 40, 50, 60, 70, 80, 90, 100]</code></td>
+			</tr>
+		</tbody>
+	</table>
+
+	<h2>Configuration</h2>
+	<p>Set custom step arrays in <code>wrangler.jsonc</code> as JSON-encoded strings:</p>
+	<pre><code>{`"vars": {
+  "STEPS_SIZE": "[320, 640, 1280, 2560]",
+  "STEPS_QUALITY": "[25, 50, 75, 100]"
+}`}</code></pre>
+
+	<h2>Edge cases</h2>
+	<table>
+		<thead>
+			<tr>
+				<th>Scenario</th>
+				<th>Behavior</th>
+			</tr>
+		</thead>
+		<tbody>
+			<tr>
+				<td><strong>Value exceeds all steps</strong></td>
+				<td>The largest step is used (e.g. <code>w=5000</code> snaps to <code>3840</code>)</td>
+			</tr>
+			<tr>
+				<td><strong>No steps configured</strong></td>
+				<td>Values pass through unchanged, no snapping is applied</td>
+			</tr>
+			<tr>
+				<td><strong>No parameter provided</strong></td>
+				<td>Steps have no effect; the image is served at its original dimensions/quality</td>
+			</tr>
+		</tbody>
+	</table>
+
+	<h2>Why use steps?</h2>
+	<p>Without steps, requests for <code>w=799</code>, <code>w=800</code>, and <code>w=801</code> would each produce and cache a separate image. With the default size steps, all three snap to <code>w=1080</code> and share a single cached variant - reducing storage usage and improving cache hit rates.</p>
 </Layout>

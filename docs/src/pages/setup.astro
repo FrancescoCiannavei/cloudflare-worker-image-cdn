@@ -15,9 +15,11 @@ import Layout from "../layouts/Layout.astro";
 	<pre><code>npm install</code></pre>
 
 	<h2>Configuration</h2>
-	<p>Edit <code>wrangler.jsonc</code> to set your origin server URL:</p>
+	<p>Edit <code>wrangler.jsonc</code> to set your origin server URL and optional step arrays:</p>
 	<pre><code>{`"vars": {
-    "PROXY_ORIGINAL_URL": "https://your-origin.com/images"
+    "PROXY_ORIGINAL_URL": "https://your-origin.com/images",
+    "STEPS_QUALITY": "[10, 20, 30, 40, 50, 60, 70, 80, 90, 100]",
+    "STEPS_SIZE": "[320, 480, 720, 1080, 1920, 2560, 3840]"
 }`}</code></pre>
 
 	<h2>Create the R2 bucket</h2>

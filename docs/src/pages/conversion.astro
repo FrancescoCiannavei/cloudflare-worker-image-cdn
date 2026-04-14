@@ -2,51 +2,61 @@
 import Layout from "../layouts/Layout.astro";
 ---
 
-<Layout title="Quality - Worker Image CDN">
+<Layout title="Conversion - Worker Image CDN">
 	<h1>Conversion</h1>
-	<p>Lorem</p>
+	<p>Images are automatically converted to modern formats based on the browser's <code>Accept</code> header. No query parameter is needed - the worker picks the best format the client supports.</p>
 
 	<h2>Comparison</h2>
 	<img-comparison-slider>
-		<img slot="first" src="https://demo-cloudflare-cdn.ciannavei.dev/images/examples/jojo-sbr-gyro.png" alt="Quality 100" />
-		<img slot="second" src="https://docs-cloudflare-cdn.ciannavei.dev/images/examples/jojo-sbr-gyro.png" alt="Quality 10" />
+		<img slot="first" src="https://docs-cloudflare-cdn.ciannavei.dev/images/examples/jojo-sbr-gyro.png" alt="Original PNG" />
+		<img slot="second" src="https://demo-cloudflare-cdn.ciannavei.dev/images/examples/jojo-sbr-gyro.png" alt="Converted to AVIF" />
 	</img-comparison-slider>
 	<div class="comparison-labels">
-		<span>Original (png): 1600Kb</span>
-		<span>Converted (avif): 400Kb</span>
+		<span>Original (PNG): 1600 KB</span>
+		<span>Converted (AVIF): 400 KB</span>
 	</div>
 
-	<h2>Parameter</h2>
+	<h2>Format priority</h2>
+	<p>The worker inspects the <code>Accept</code> header and selects the best supported format:</p>
 	<table>
 		<thead>
 			<tr>
-				<th>Parameter</th>
-				<th>Range</th>
-				<th>Default</th>
-				<th>Example</th>
+				<th>Format</th>
+				<th>Priority</th>
 			</tr>
 		</thead>
 		<tbody>
 			<tr>
-				<td><code>quality</code></td>
-				<td>1 - 100</td>
-				<td>100</td>
-				<td><code>?quality=80</code></td>
+				<td><strong>AVIF</strong></td>
+				<td>Preferred when the client sends <code>image/avif</code> and the image fits within the pixel limit</td>
+			</tr>
+			<tr>
+				<td><strong>WebP</strong></td>
+				<td>Used when AVIF is unsupported or exceeds the pixel limit</td>
+			</tr>
+			<tr>
+				<td><strong>Original</strong></td>
+				<td>Served as-is when neither format is accepted</td>
 			</tr>
 		</tbody>
 	</table>
 
-	<h2>How it works</h2>
-	<ul class="content-list">
-		<li>Quality is applied during format conversion (AVIF/WebP)</li>
-		<li>Lower values produce smaller files with some visual loss</li>
-		<li>Values are clamped between 1 and 100</li>
-		<li>When no <code>quality</code> param is provided, the default is <strong>100</strong> (no quality reduction)</li>
-	</ul>
+	<h2>AVIF pixel limit</h2>
+	<p>AVIF encoding is memory-intensive. Images larger than <strong>5 million pixels</strong> (e.g. 2500 &times; 2000) automatically fall back to WebP to stay within the 128 MB Worker memory limit.</p>
 
-	<h2>Combining with other params</h2>
-	<pre><code>/photo.jpg?w=800&quality=80
-/photo.jpg?w=400&h=300&quality=60</code></pre>
+	<h2>Fallback chain</h2>
+	<p>If encoding fails at any stage, the worker retries with the next format rather than returning an error:</p>
+	<pre><code>AVIF encoding fails → retry as WebP → serve original image</code></pre>
+	<p>This guarantees a valid image is always returned. The <code>X-Cache: BYPASS</code> header indicates the original was served due to a processing failure.</p>
+
+	<h2>SVG passthrough</h2>
+	<p>SVG images are never converted. They are served directly from the origin without any transformation.</p>
+
+	<h2>How it works</h2>
+	<pre><code>{`Browser sends:  Accept: image/avif, image/webp, image/*
+Worker checks:  AVIF supported? → within pixel limit? → encode AVIF
+                WebP supported? → encode WebP
+                else → serve original`}</code></pre>
 </Layout>
 
 <script>
