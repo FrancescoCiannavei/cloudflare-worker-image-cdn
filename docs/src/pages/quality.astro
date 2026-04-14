@@ -37,12 +37,32 @@ import Layout from "../layouts/Layout.astro";
 	</table>
 
 	<h2>How it works</h2>
-	<ul class="content-list">
-		<li>Quality is applied during format conversion (AVIF/WebP)</li>
-		<li>Lower values produce smaller files with some visual loss</li>
-		<li>Values are clamped between 1 and 100</li>
-		<li>When no <code>quality</code> param is provided, the default is <strong>100</strong> (no quality reduction)</li>
-	</ul>
+	<table>
+		<thead>
+			<tr>
+				<th>Mechanism</th>
+				<th>Description</th>
+			</tr>
+		</thead>
+		<tbody>
+			<tr>
+				<td><strong>Compression</strong></td>
+				<td>Quality is applied during format conversion (AVIF/WebP)</td>
+			</tr>
+			<tr>
+				<td><strong>Efficiency</strong></td>
+				<td>Lower values produce smaller files with some visual loss</td>
+			</tr>
+			<tr>
+				<td><strong>Clamping</strong></td>
+				<td>Values are clamped between 1 and 100</td>
+			</tr>
+			<tr>
+				<td><strong>Default</strong></td>
+				<td>When no <code>quality</code> param is provided, the default is <strong>100</strong> (no reduction)</td>
+			</tr>
+		</tbody>
+	</table>
 
 	<h2>Step snapping</h2>
 	<p>Quality values are snapped to the nearest <a href="/steps">quality step</a> before processing. For example, <code>?quality=75</code> snaps to <code>quality=80</code> with the default step configuration.</p>
