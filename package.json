@@ -16,13 +16,16 @@
 	"main": "src/index.ts",
 	"scripts": {
 		"dev": "wrangler dev",
-		"test": "echo \"Error: no test specified\" && exit 1"
+		"test": "jest"
 	},
 	"dependencies": {
-		"@cloudflare/vitest-pool-workers": "^0.14.2",
 		"typescript": "^6.0.2",
-		"vitest": "^4.1.4",
 		"wasm-image-optimization": "^2.0.7",
 		"wrangler": "^4.81.0"
+	},
+	"devDependencies": {
+		"@types/jest": "^30.0.0",
+		"jest": "^30.3.0",
+		"ts-jest": "^29.4.9"
 	}
 }
