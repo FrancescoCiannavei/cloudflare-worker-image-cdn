@@ -6,7 +6,7 @@ import sitemap from '@astrojs/sitemap';
 
 // https://astro.build/config
 export default defineConfig({
-  site: 'http://localhost:4321',
+  site: 'https://docs-cloudflare-cdn.ciannavei.dev',
   adapter: cloudflare(),
   integrations: [sitemap()],
 });
