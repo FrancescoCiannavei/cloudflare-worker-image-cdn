@@ -2,9 +2,65 @@
 import Layout from "../layouts/Layout.astro";
 ---
 
+<style lang="scss">
+	@use "../style/vars" as *;
+
+	.deploy-badge {
+		display: inline-block;
+
+		img {
+			display: block;
+			transition: opacity 0.2s ease;
+		}
+
+		&:hover img {
+			opacity: 0.85;
+		}
+	}
+
+	.flow {
+		margin: 24px auto;
+		border-collapse: separate;
+		border-spacing: 20px 0;
+		width: auto;
+
+		td {
+			padding: 0;
+			text-align: center;
+			vertical-align: middle;
+			border: none;
+		}
+
+		.node {
+			padding: 10px 18px;
+			border: 1px solid $borderCol;
+			border-radius: 6px;
+			background: $bgCard;
+			color: $textPrimary;
+			font-size: 0.9rem;
+			white-space: nowrap;
+			min-width: 180px;
+		}
+
+		.arrow {
+			padding: 6px 0;
+			color: $textSecondary;
+			font-size: 1.1rem;
+			line-height: 1;
+		}
+	}
+</style>
+
 <Layout title="Introduction - Worker Image CDN">
 	<h1>Worker Image CDN</h1>
-	<p>A Cloudflare Worker that acts as an image CDN proxy. It fetches images from an origin server, automatically converts them to modern formats, resizes on the fly, and caches the results in R2.</p>
+	<p>A Cloudflare Worker that acts as an image CDN proxy. It fetches images from an origin server, automatically converts them to modern formats, resizes them on the fly, and caches the results in R2 for fast subsequent delivery.</p>
+
+	<p>It runs entirely on Cloudflare's edge — no servers to manage, no build step per image.</p>
+	<p>
+		<a class="deploy-badge" href="/setup">
+			<img src="/images/deploy-to-cloudflare.svg" alt="Deploy to Cloudflare" width="240" />
+		</a>
+	</p>
 
 	<h2>Features</h2>
 	<table>
@@ -16,48 +72,54 @@ import Layout from "../layouts/Layout.astro";
 		</thead>
 		<tbody>
 			<tr>
-				<td><strong>Automatic format conversion</strong></td>
+				<td><a href="/conversion"><strong>Automatic format conversion</strong></a></td>
 				<td>Serves AVIF or WebP based on the browser's <code>Accept</code> header</td>
 			</tr>
 			<tr>
-				<td><strong>On-the-fly resizing</strong></td>
-				<td>Resize via query parameters, preserving aspect ratio</td>
+				<td><a href="/resize"><strong>On-the-fly resizing</strong></a></td>
+				<td>Resize via <code>?w=</code> and <code>?h=</code>, preserving aspect ratio and never upscaling</td>
 			</tr>
 			<tr>
-				<td><strong>Quality control</strong></td>
+				<td><a href="/quality"><strong>Quality control</strong></a></td>
 				<td>Adjust output quality with <code>?quality=80</code></td>
 			</tr>
 			<tr>
-				<td><strong>R2 caching</strong></td>
-				<td>Transformed images are cached in Cloudflare R2</td>
+				<td><a href="/cache"><strong>R2 caching</strong></a></td>
+				<td>Transformed images are stored in Cloudflare R2 and reused on subsequent requests</td>
 			</tr>
 			<tr>
-				<td><strong>Step snapping</strong></td>
-				<td>Dimensions and quality snap to configured steps for efficient caching</td>
+				<td><a href="/steps"><strong>Step snapping</strong></a></td>
+				<td>Dimensions and quality snap to configured steps, keeping the cache small and hit rates high</td>
 			</tr>
 			<tr>
-				<td><strong>SVG passthrough</strong></td>
-				<td>SVGs are served as-is without conversion</td>
-			</tr>
-			<tr>
-				<td><strong>Cache observability</strong></td>
-				<td><code>X-Cache: HIT/MISS</code> header</td>
+				<td><a href="/cache"><strong>Cache observability</strong></a></td>
+				<td>Every response carries an <code>X-Cache: HIT/MISS</code> header</td>
 			</tr>
 		</tbody>
 	</table>
 
 	<h2>How it works</h2>
-	<pre><code>Request → Check R2 cache → [HIT]  → Serve cached image
-                        → [MISS] → Fetch from origin
-                                  → Resize (if requested)
-                                  → Convert to AVIF/WebP
-                                  → Store in R2
-                                  → Serve image</code></pre>
-
-	<h2>Quick start</h2>
-	<pre><code>npm install
-npx wrangler r2 bucket create worker-cdn-images
-npm run dev</code></pre>
-	<p>Then request an image:</p>
-	<pre><code>http://localhost:8787/photo.jpg?w=800&quality=80</code></pre>
+	<table class="flow">
+		<tbody>
+			<tr><td class="node" colspan="2">Request</td></tr>
+			<tr><td class="arrow" colspan="2">↓</td></tr>
+			<tr><td class="node" colspan="2">Check R2 cache</td></tr>
+			<tr>
+				<td class="arrow">HIT&nbsp;&nbsp;↙</td>
+				<td class="arrow">↘&nbsp;&nbsp;MISS</td>
+			</tr>
+			<tr>
+				<td class="node">Serve cached image</td>
+				<td class="node">Fetch from origin</td>
+			</tr>
+			<tr><td></td><td class="arrow">↓</td></tr>
+			<tr><td></td><td class="node">Resize (if requested)</td></tr>
+			<tr><td></td><td class="arrow">↓</td></tr>
+			<tr><td></td><td class="node">Convert to AVIF / WebP</td></tr>
+			<tr><td></td><td class="arrow">↓</td></tr>
+			<tr><td></td><td class="node">Store in R2</td></tr>
+			<tr><td></td><td class="arrow">↓</td></tr>
+			<tr><td></td><td class="node">Serve image</td></tr>
+		</tbody>
+	</table>
 </Layout>

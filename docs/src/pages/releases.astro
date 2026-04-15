@@ -1,42 +1,10 @@
 ---
 import Layout from "../layouts/Layout.astro";
+import { fetchReleases, deployUrl, REPO_URL } from "../lib/releases";
 
-type Release = {
-	id: number;
-	name: string | null;
-	tag_name: string;
-	html_url: string;
-	published_at: string | null;
-	body: string | null;
-	prerelease: boolean;
-	draft: boolean;
-};
-
-const REPO = "FrancescoCiannavei/cloudflare-worker-image-cdn";
-
-let releases: Release[] = [];
-let fetchError: string | null = null;
-
-try {
-	const res = await fetch(`https://api.github.com/repos/${REPO}/releases?per_page=100`, {
-		headers: {
-			Accept: "application/vnd.github+json",
-			"User-Agent": "cloudflare-worker-image-cdn-docs",
-		},
-		cf: {
-			cacheTtl: 3600,
-			cacheEverything: true,
-		},
-	} as RequestInit);
-	if (!res.ok) {
-		fetchError = `GitHub API returned ${res.status}`;
-	} else {
-		const data = (await res.json()) as Release[];
-		releases = data.filter((r) => !r.draft);
-	}
-} catch (err) {
-	fetchError = err instanceof Error ? err.message : "Unknown error";
-}
+const result = await fetchReleases();
+const releases = result.ok ? result.releases : [];
+const fetchError = result.ok ? null : result.error;
 
 const dateFormatter = new Intl.DateTimeFormat("en-US", {
 	year: "numeric",
@@ -47,7 +15,7 @@ const dateFormatter = new Intl.DateTimeFormat("en-US", {
 
 <Layout title="Releases - Worker Image CDN">
 	<h1>Releases</h1>
-	<p>All published releases from the <a href={`https://github.com/${REPO}/releases`} target="_blank" rel="noopener">GitHub repository</a>.</p>
+	<p>All published releases from the <a href={`${REPO_URL}/releases`} target="_blank" rel="noopener">GitHub repository</a>.</p>
 
 	{fetchError && (
 		<div class="error">
@@ -82,7 +50,7 @@ const dateFormatter = new Intl.DateTimeFormat("en-US", {
 					)}
 					<a
 						class="deploy-button"
-						href={`https://deploy.workers.cloudflare.com/?url=https://github.com/${REPO}/tree/${release.tag_name}`}
+						href={deployUrl(release.tag_name)}
 						target="_blank"
 						rel="noopener"
 					>

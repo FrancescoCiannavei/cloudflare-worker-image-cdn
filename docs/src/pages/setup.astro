@@ -1,40 +1,78 @@
 ---
 import Layout from "../layouts/Layout.astro";
+import { fetchReleases, getLatestStableRelease, deployUrl } from "../lib/releases";
+
+const result = await fetchReleases();
+const latest = result.ok ? getLatestStableRelease(result.releases) : null;
+const deployTarget = latest?.tag_name ?? "main";
+const href = deployUrl(deployTarget);
 ---
 
 <Layout title="Setup - Worker Image CDN">
 	<h1>Setup</h1>
+	<p>Deployment is one click. You only need a Cloudflare account with R2 enabled — no local toolchain, no manual <code>wrangler</code> invocations.</p>
 
 	<h2>Prerequisites</h2>
 	<ul class="content-list">
-		<li><a href="https://nodejs.org/">Node.js</a> v18 or later</li>
-		<li>A <a href="https://dash.cloudflare.com/sign-up">Cloudflare account</a></li>
+		<li>A <a href="https://dash.cloudflare.com/sign-up" target="_blank" rel="noopener">Cloudflare account</a></li>
+		<li><a href="https://developers.cloudflare.com/r2/get-started/" target="_blank" rel="noopener">R2 enabled</a> on that account</li>
 	</ul>
 
-	<h2>Installation</h2>
-	<pre><code>npm install</code></pre>
-
-	<h2>Configuration</h2>
-	<p>Edit <code>wrangler.jsonc</code> to set your origin server URL and optional step arrays:</p>
-	<pre><code>{`"vars": {
-    "PROXY_ORIGINAL_URL": "https://your-origin.com/images",
-    "STEPS_QUALITY": "[10, 20, 30, 40, 50, 60, 70, 80, 90, 100]",
-    "STEPS_SIZE": "[320, 480, 720, 1080, 1920, 2560, 3840]"
-}`}</code></pre>
-
-	<h2>Create the R2 bucket</h2>
-	<pre><code>npx wrangler r2 bucket create worker-cdn-images</code></pre>
-
-	<h2>Generate types</h2>
-	<pre><code>npx wrangler types</code></pre>
-
-	<h2>Local development</h2>
-	<p>Start the dev origin server:</p>
-	<pre><code>cd server && npm install && node index.js</code></pre>
-	<p>In another terminal, start the worker:</p>
-	<pre><code>npm run dev</code></pre>
-	<p>The worker runs at <code>http://localhost:8787</code>.</p>
-
 	<h2>Deploy</h2>
-	<pre><code>npx wrangler deploy</code></pre>
+	<p>
+		Click the button to deploy
+		{latest ? <>version <code>{latest.tag_name}</code></> : <>the latest version</>}
+		to your Cloudflare account. Cloudflare forks the repository, provisions the Worker, and creates the R2 bucket for you.
+	</p>
+	<p>
+		<a class="deploy-button" href={href} target="_blank" rel="noopener">
+			Deploy to Cloudflare Workers
+		</a>
+	</p>
+
+	<h2>Configure</h2>
+	<p>After the initial deploy, open <code>wrangler.jsonc</code> in your forked repository and change the following variables to match your setup:</p>
+	<table>
+		<thead>
+			<tr>
+				<th>Variable</th>
+				<th>What to change</th>
+			</tr>
+		</thead>
+		<tbody>
+			<tr>
+				<td><code>PROXY_ORIGINAL_URL</code></td>
+				<td>Your image origin — e.g. <code>https://docs-cloudflare-cdn.ciannavei.dev/</code></td>
+			</tr>
+			<tr>
+				<td><code>STEPS_QUALITY</code></td>
+				<td>Allowed output quality values. Default: <code>[10, 20, 30, 40, 50, 60, 70, 80, 90, 100]</code></td>
+			</tr>
+			<tr>
+				<td><code>STEPS_SIZE</code></td>
+				<td>Allowed output widths and heights. Default: <code>[320, 480, 720, 1080, 1920, 2560, 3840]</code></td>
+			</tr>
+		</tbody>
+	</table>
+	<p>Commit your changes — Cloudflare redeploys the worker automatically on every push.</p>
 </Layout>
+
+<style lang="scss">
+	@use "../style/vars" as *;
+
+	.deploy-button {
+		display: inline-block;
+		margin: 12px 0 8px;
+		padding: 10px 20px;
+		border-radius: 6px;
+		background: $mainCol;
+		color: #000;
+		font-weight: 600;
+		text-decoration: none;
+		transition: opacity 0.15s;
+
+		&:hover {
+			opacity: 0.85;
+		}
+	}
+</style>
