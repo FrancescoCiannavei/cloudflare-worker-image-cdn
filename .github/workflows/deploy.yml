@@ -6,7 +6,12 @@ on:
       - main
 
 jobs:
+  test:
+    name: Test
+    uses: ./.github/workflows/test.yml
+
   deploy-docs:
+    needs: test
     runs-on: ubuntu-latest
     name: Deploy Docs
     steps:
@@ -34,6 +39,7 @@ jobs:
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
 
   deploy-worker:
+    needs: test
     runs-on: ubuntu-latest
     name: Deploy Worker Demo
     steps:
