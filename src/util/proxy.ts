@@ -49,14 +49,11 @@ export async function proxyRequest(
 	if (width !== undefined) width = snapToStep(width, sizeSteps);
 	if (height !== undefined) height = snapToStep(height, sizeSteps);
 
-	// Update URL params to snapped values so cache keys are consistent
-	if (url.searchParams.has("quality")) url.searchParams.set("quality", String(quality));
-	if (url.searchParams.has("w")) url.searchParams.set("w", String(width));
-	if (url.searchParams.has("h")) url.searchParams.set("h", String(height));
+	const cacheParams = { quality, width, height };
 
 	// Check R2 cache before fetching from origin
 	if (format) {
-		const cached = await getCachedImage(bucket, url, format);
+		const cached = await getCachedImage(bucket, url.pathname, format, cacheParams);
 		if (cached) {
 			return new Response(cached.data, {
 				status: 200,
@@ -154,7 +151,7 @@ export async function proxyRequest(
 		}
 
 		// Store in R2 cache (non-blocking)
-		ctx.waitUntil(putCachedImage(bucket, url, outputFormat, converted));
+		ctx.waitUntil(putCachedImage(bucket, url.pathname, outputFormat, cacheParams, converted));
 
 		return new Response(converted, {
 			status: 200,

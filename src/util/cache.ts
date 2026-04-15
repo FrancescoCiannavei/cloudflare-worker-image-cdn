@@ -1,20 +1,33 @@
 /**
  * Util to cache transformed images in R2
- * Uses the request URL (path + query) as the cache key
+ *
+ * Cache keys are built from a canonical (format, path, quality, w, h) tuple —
+ * NOT from the raw request query string. This avoids fragmenting the cache on
+ * query param order (`?w=100&h=200` vs `?h=200&w=100`) or on unrelated params
+ * the client may tack on (tracking params, cache-busters, etc.).
  */
 import { ImageFormat, getContentType } from "./convert";
 
-export function buildCacheKey(url: URL, format: ImageFormat): string {
-	// return example: avif/john-cena.jpg?quality=10&w=600&h=100
-	return `${format}${url.pathname}${url.search}`;
+export interface CacheParams {
+	quality: number;
+	width?: number;
+	height?: number;
+}
+
+export function buildCacheKey(pathname: string, format: ImageFormat, params: CacheParams): string {
+	let key = `${format}${pathname}?quality=${params.quality}`;
+	if (params.width !== undefined) key += `&w=${params.width}`;
+	if (params.height !== undefined) key += `&h=${params.height}`;
+	return key;
 }
 
 export async function getCachedImage(
 	bucket: R2Bucket,
-	url: URL,
+	pathname: string,
 	format: ImageFormat,
+	params: CacheParams,
 ): Promise<{ data: ReadableStream; contentType: string } | null> {
-	const key = buildCacheKey(url, format);
+	const key = buildCacheKey(pathname, format, params);
 	const object = await bucket.get(key);
 
 	if (!object) return null;
@@ -25,11 +38,12 @@ export async function getCachedImage(
 
 export async function putCachedImage(
 	bucket: R2Bucket,
-	url: URL,
+	pathname: string,
 	format: ImageFormat,
+	params: CacheParams,
 	data: Uint8Array,
 ): Promise<void> {
-	const key = buildCacheKey(url, format);
+	const key = buildCacheKey(pathname, format, params);
 	await bucket.put(key, data, {
 		httpMetadata: {
 			contentType: getContentType(format),
