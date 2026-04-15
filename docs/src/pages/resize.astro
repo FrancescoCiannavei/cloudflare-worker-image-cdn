@@ -6,6 +6,21 @@ import Layout from "../layouts/Layout.astro";
 	<h1>Resizing</h1>
 	<p>Resize images on the fly using the <code>w</code> and <code>h</code> query parameters. Aspect ratio is always preserved and images are never upscaled.</p>
 
+	<div class="resize-examples">
+		<figure>
+			<img src="https://demo-cloudflare-cdn.ciannavei.dev/images/examples/jojo-dio.jpg?w=720&quality=80" alt="Resized to 720px width" width="720" />
+			<figcaption><code>?w=720</code></figcaption>
+		</figure>
+		<figure>
+			<img src="https://demo-cloudflare-cdn.ciannavei.dev/images/examples/jojo-dio.jpg?w=480&quality=80" alt="Resized to 480px width" width="480" />
+			<figcaption><code>?w=480</code></figcaption>
+		</figure>
+		<figure>
+			<img src="https://demo-cloudflare-cdn.ciannavei.dev/images/examples/jojo-dio.jpg?w=320&quality=80" alt="Resized to 320px width" width="320" />
+			<figcaption><code>?w=320</code></figcaption>
+		</figure>
+	</div>
+
 	<h2>Parameters</h2>
 	<table>
 		<thead>
@@ -90,8 +105,38 @@ import Layout from "../layouts/Layout.astro";
 	<p>Requested dimensions are snapped to the nearest <a href="/steps">size step</a> before processing. For example, <code>?w=500</code> snaps to <code>w=720</code> with the default step configuration.</p>
 
 	<h2>Examples</h2>
-	<img src="https://demo-cloudflare-cdn.ciannavei.dev/images/examples/jojo-dio.jpg?w=1080&quality=80" alt="Resizing example" style="max-width: 100%; border-radius: 8px; margin-bottom: 24px;" />
 	<pre><code>/photo.jpg?w=400
 /photo.jpg?h=300
 /photo.jpg?w=800&h=600</code></pre>
 </Layout>
+
+<style lang="scss">
+	@use "../style/vars" as *;
+
+	.resize-examples {
+		display: flex;
+		flex-wrap: wrap;
+		align-items: flex-end;
+		gap: 16px;
+
+		figure {
+			margin: 0;
+			display: flex;
+			flex-direction: column;
+			align-items: center;
+			gap: 8px;
+
+			img {
+				max-width: 100%;
+				height: auto;
+				border-radius: 8px;
+				border: 1px solid $borderCol;
+			}
+
+			figcaption {
+				font-size: 0.8rem;
+				color: $textSecondary;
+			}
+		}
+	}
+</style>
