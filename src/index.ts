@@ -1,20 +1,14 @@
-/**
- * Welcome to Cloudflare Workers! This is your first worker.
- *
- * - Run `npm run dev` in your terminal to start a development server
- * - Open a browser tab at http://localhost:8787/ to see your worker in action
- * - Run `npm run deploy` to publish your worker
- *
- * Bind resources to your worker in `wrangler.jsonc`. After adding bindings, a type definition for the
- * `Env` object can be regenerated with `npm run cf-typegen`.
- *
- * Learn more at https://developers.cloudflare.com/workers/
- */
-
 import { proxyRequest } from "./util/proxy";
 
 export default {
 	async fetch(request, env, ctx): Promise<Response> {
-		return proxyRequest(request, env.PROXY_ORIGINAL_URL, env.WORKER_CDN_IMAGES, ctx, env.STEPS_QUALITY, env.STEPS_SIZE);
+		try {
+			return await proxyRequest(request, env.PROXY_ORIGINAL_URL, env.WORKER_CDN_IMAGES, ctx, env.STEPS_QUALITY, env.STEPS_SIZE);
+		} catch (err) {
+			// Last-resort fallback: if anything upstream of the transform pipeline throws (URL parsing, R2 outage, origin fetch failure, etc.), redirect to the origin so the client still gets an image instead of a 500.
+			console.error("proxyRequest failed, falling back to origin redirect", err);
+			const url = new URL(request.url);
+			return Response.redirect(`${env.PROXY_ORIGINAL_URL}${url.pathname}${url.search}`, 302);
+		}
 	},
 } satisfies ExportedHandler<Env>;
