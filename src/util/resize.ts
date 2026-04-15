@@ -1,38 +1,7 @@
 /**
- * Util to resize the image
- * Takes width/height params and resizes while preserving aspect ratio
- * Never upscales - only makes images smaller
+ * Util to compute target dimensions while preserving aspect ratio.
+ * Never upscales — only makes images smaller.
  */
-import { optimizeImage } from "wasm-image-optimization/workerd";
-
-export async function resizeImage(
-	imageData: ArrayBuffer,
-	targetWidth?: number,
-	targetHeight?: number,
-): Promise<Uint8Array> {
-	// Get original dimensions
-	const probe = await optimizeImage({
-		image: new Uint8Array(imageData),
-	});
-
-	const origW = probe.originalWidth;
-	const origH = probe.originalHeight;
-
-	const { width, height } = computeDimensions(origW, origH, targetWidth, targetHeight);
-
-	if (width === origW && height === origH) {
-		return probe.data;
-	}
-
-	const result = await optimizeImage({
-		image: new Uint8Array(imageData),
-		width,
-		height,
-		fit: "contain",
-	});
-
-	return result.data;
-}
 
 export function computeDimensions(
 	origW: number,

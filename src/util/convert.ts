@@ -1,7 +1,6 @@
 /**
  * Util to convert the image to the best supported format
  */
-import { optimizeImage } from "wasm-image-optimization/workerd";
 
 export type ImageFormat = "avif" | "webp";
 
@@ -33,17 +32,4 @@ const CONTENT_TYPES: Record<ImageFormat, string> = {
 
 export function getContentType(format: ImageFormat): string {
 	return CONTENT_TYPES[format];
-}
-
-export async function convertImage(
-	imageData: ArrayBuffer,
-	format: ImageFormat,
-	quality = 100,
-): Promise<Uint8Array> {
-	const result = await optimizeImage({
-		image: new Uint8Array(imageData),
-		format,
-		quality,
-	});
-	return result.data;
 }
