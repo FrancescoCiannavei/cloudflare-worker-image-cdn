@@ -5,9 +5,15 @@ import Sidebar from "../components/Sidebar.astro";
 
 interface Props {
 	title?: string;
+	description?: string;
 }
 
-const { title = "Worker Image CDN" } = Astro.props;
+const {
+	title = "Worker Image CDN",
+	description = "Fast, self-hosted image CDN running on Cloudflare Workers with on-the-fly AVIF/WebP conversion, resizing, quality control, and caching.",
+} = Astro.props;
+
+const canonical = new URL(Astro.url.pathname, Astro.site).toString();
 ---
 
 <!doctype html>
@@ -16,6 +22,15 @@ const { title = "Worker Image CDN" } = Astro.props;
 		<meta charset="UTF-8" />
 		<meta name="viewport" content="width=device-width" />
 		<title>{title}</title>
+		<meta name="description" content={description} />
+		<link rel="canonical" href={canonical} />
+		<meta property="og:title" content={title} />
+		<meta property="og:description" content={description} />
+		<meta property="og:type" content="website" />
+		<meta property="og:url" content={canonical} />
+		<meta name="twitter:card" content="summary" />
+		<meta name="twitter:title" content={title} />
+		<meta name="twitter:description" content={description} />
 	</head>
 	<body>
 		<Navbar />
