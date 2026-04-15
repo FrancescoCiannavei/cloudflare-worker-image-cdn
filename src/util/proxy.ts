@@ -23,6 +23,13 @@ export async function proxyRequest(
 	stepsQualityRaw?: string,
 	stepsSizeRaw?: string,
 ): Promise<Response> {
+	if (request.method !== "GET" && request.method !== "HEAD") {
+		return new Response("Method Not Allowed", {
+			status: 405,
+			headers: { Allow: "GET, HEAD" },
+		});
+	}
+
 	const url = new URL(request.url);
 	const originUrl = `${originBaseUrl}${url.pathname}${url.search}`;
 
@@ -66,10 +73,7 @@ export async function proxyRequest(
 	const originHost = new URL(originUrl).host;
 	const originResponse = await fetch(originUrl, {
 		method: request.method,
-		headers: {
-			...Object.fromEntries(request.headers),
-			Host: originHost,
-		},
+		headers: { Host: originHost },
 	});
 
 	if (!originResponse.ok) {
