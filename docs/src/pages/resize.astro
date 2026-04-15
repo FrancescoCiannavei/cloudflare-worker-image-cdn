@@ -6,19 +6,25 @@ import Layout from "../layouts/Layout.astro";
 	<h1>Resizing</h1>
 	<p>Resize images on the fly using the <code>w</code> and <code>h</code> query parameters. Aspect ratio is always preserved and images are never upscaled.</p>
 
-	<div class="resize-examples">
-		<figure>
-			<img src="https://demo-cloudflare-cdn.ciannavei.dev/images/examples/jojo-dio.jpg?w=720&quality=80" alt="Resized to 720px width" width="720" />
-			<figcaption><code>?w=720</code></figcaption>
-		</figure>
-		<figure>
-			<img src="https://demo-cloudflare-cdn.ciannavei.dev/images/examples/jojo-dio.jpg?w=480&quality=80" alt="Resized to 480px width" width="480" />
-			<figcaption><code>?w=480</code></figcaption>
-		</figure>
-		<figure>
-			<img src="https://demo-cloudflare-cdn.ciannavei.dev/images/examples/jojo-dio.jpg?w=320&quality=80" alt="Resized to 320px width" width="320" />
-			<figcaption><code>?w=320</code></figcaption>
-		</figure>
+	<div class="resize-demo">
+		<div class="resize-demo-stage">
+			<img
+				id="resize-demo-img"
+				src="https://demo-cloudflare-cdn.ciannavei.dev/images/examples/jojo-dio.jpg?w=720&quality=80"
+				alt="Interactive resize demo"
+				width="720"
+			/>
+		</div>
+		<input type="range" id="resize-demo-slider" min="280" max="720" value="720" step="1" />
+		<div class="resize-demo-readout">
+			<span>Requested: <code id="resize-demo-requested">720</code>px</span>
+			<span class="arrow">&rarr;</span>
+			<span>Served: <code id="resize-demo-served">720</code>px</span>
+		</div>
+		<p class="resize-demo-note">The served value is snapped up to the nearest <a href="/steps">size step</a>.</p>
+		<div class="resize-demo-url">
+			<code id="resize-demo-url">/images/examples/jojo-dio.jpg?w=720</code>
+		</div>
 	</div>
 
 	<h2>Parameters</h2>
@@ -110,32 +116,151 @@ import Layout from "../layouts/Layout.astro";
 /photo.jpg?w=800&h=600</code></pre>
 </Layout>
 
+<script>
+	const STEPS = [320, 480, 720];
+	const IMAGE_PATH = "/images/examples/jojo-dio.jpg";
+	const IMAGE_BASE = `https://demo-cloudflare-cdn.ciannavei.dev${IMAGE_PATH}`;
+
+	const slider = document.getElementById("resize-demo-slider") as HTMLInputElement;
+	const img = document.getElementById("resize-demo-img") as HTMLImageElement;
+	const requestedEl = document.getElementById("resize-demo-requested")!;
+	const servedEl = document.getElementById("resize-demo-served")!;
+	const urlEl = document.getElementById("resize-demo-url")!;
+
+	function snap(value: number): number {
+		for (const step of STEPS) if (value <= step) return step;
+		return STEPS[STEPS.length - 1];
+	}
+
+	let lastServed = 720;
+	slider.addEventListener("input", () => {
+		const requested = Number(slider.value);
+		const served = snap(requested);
+		requestedEl.textContent = String(requested);
+		servedEl.textContent = String(served);
+		urlEl.textContent = `${IMAGE_PATH}?w=${served}`;
+		if (served !== lastServed) {
+			img.src = `${IMAGE_BASE}?w=${served}&quality=80`;
+			img.width = served;
+			lastServed = served;
+		}
+	});
+</script>
+
 <style lang="scss">
 	@use "../style/vars" as *;
 
-	.resize-examples {
+	.resize-demo {
 		display: flex;
-		flex-wrap: wrap;
-		align-items: flex-end;
-		gap: 16px;
+		flex-direction: column;
+		gap: 12px;
+		margin-bottom: $siteSpacing;
 
-		figure {
-			margin: 0;
+		&-stage {
+			min-height: 200px;
 			display: flex;
-			flex-direction: column;
-			align-items: center;
-			gap: 8px;
+			align-items: flex-start;
+			justify-content: flex-start;
 
 			img {
 				max-width: 100%;
 				height: auto;
 				border-radius: 8px;
 				border: 1px solid $borderCol;
+				transition: width 0.1s ease-out;
+			}
+		}
+
+		input[type="range"] {
+			width: 100%;
+			height: 24px;
+			background: transparent;
+			appearance: none;
+			-webkit-appearance: none;
+			cursor: pointer;
+
+			&::-webkit-slider-runnable-track {
+				height: 6px;
+				border-radius: 3px;
+				background: $bgCard;
+				border: 1px solid $borderCol;
 			}
 
-			figcaption {
-				font-size: 0.8rem;
-				color: $textSecondary;
+			&::-moz-range-track {
+				height: 6px;
+				border-radius: 3px;
+				background: $bgCard;
+				border: 1px solid $borderCol;
+			}
+
+			&::-webkit-slider-thumb {
+				appearance: none;
+				-webkit-appearance: none;
+				width: 18px;
+				height: 18px;
+				border-radius: 50%;
+				background: $mainCol;
+				border: 2px solid $bgDark;
+				margin-top: -7px;
+				box-shadow: 0 0 0 1px $mainCol;
+				transition: transform 0.1s ease-out, background 0.1s ease-out;
+			}
+
+			&::-moz-range-thumb {
+				width: 18px;
+				height: 18px;
+				border-radius: 50%;
+				background: $mainCol;
+				border: 2px solid $bgDark;
+				box-shadow: 0 0 0 1px $mainCol;
+				transition: transform 0.1s ease-out, background 0.1s ease-out;
+			}
+
+			&:hover::-webkit-slider-thumb,
+			&:focus::-webkit-slider-thumb {
+				background: $mainColLight;
+				transform: scale(1.1);
+			}
+
+			&:hover::-moz-range-thumb,
+			&:focus::-moz-range-thumb {
+				background: $mainColLight;
+				transform: scale(1.1);
+			}
+
+			&:focus {
+				outline: none;
+			}
+		}
+
+		&-readout {
+			display: flex;
+			gap: 8px;
+			align-items: center;
+			font-size: 0.85rem;
+			color: $textSecondary;
+
+			.arrow {
+				color: $mainCol;
+			}
+
+			code {
+				color: $textPrimary;
+			}
+		}
+
+		&-note {
+			margin: 0;
+			font-size: 0.75rem;
+			color: $textSecondary;
+			font-style: italic;
+		}
+
+		&-url {
+			font-size: 0.85rem;
+
+			code {
+				color: $mainCol;
 			}
 		}
 	}
