@@ -1,0 +1,28 @@
+# Worker Image CDN
+
+> A Cloudflare Worker that proxies images from an origin, converts them to AVIF or WebP based on the browser's Accept header, resizes them on the fly, and caches the results in R2. Runs entirely on Cloudflare's edge — no servers, no per-image build step.
+
+Core behaviors:
+
+- Format is chosen automatically from the `Accept` header: AVIF when supported and within a 5-megapixel budget, WebP otherwise, original as a final fallback. SVG is passed through untouched.
+- Resizing via `?w=` and `?h=` preserves aspect ratio and never upscales. Dimensions are read directly from PNG IHDR, JPEG SOF, and WebP VP8/VP8L headers.
+- Quality via `?quality=` (1–100, default 100). Values are clamped and snapped to configured steps.
+- Requested `w`, `h`, and `quality` values are rounded up to the nearest configured step before cache lookup, so near-identical requests share one cached variant.
+- Transformed images are cached in R2. Cache key is `{format}{pathname}{search}` after step snapping. Cache writes are non-blocking. Every response carries `X-Cache: HIT`, `MISS`, or `BYPASS`. Default `Cache-Control: public, max-age=86400`.
+- Deployed with one click via the Cloudflare deploy button — only requirement is a Cloudflare account with R2 enabled. Configuration lives in `wrangler.jsonc` (`PROXY_ORIGINAL_URL`, `STEPS_SIZE`, `STEPS_QUALITY`).
+
+## Docs
+
+- [Introduction](https://docs-cloudflare-cdn.ciannavei.dev/): Overview, features table, and pipeline diagram.
+- [Setup](https://docs-cloudflare-cdn.ciannavei.dev/setup): One-click deploy flow and `wrangler.jsonc` configuration variables.
+- [Conversion](https://docs-cloudflare-cdn.ciannavei.dev/conversion): Format selection from the `Accept` header, AVIF pixel limit, fallback chain, SVG passthrough.
+- [Resizing](https://docs-cloudflare-cdn.ciannavei.dev/resize): `w`/`h` parameters, aspect-ratio behavior, no-upscale rule, supported input formats.
+- [Quality](https://docs-cloudflare-cdn.ciannavei.dev/quality): `quality` parameter, clamping, default of 100, step snapping.
+- [Steps](https://docs-cloudflare-cdn.ciannavei.dev/steps): How `STEPS_SIZE` and `STEPS_QUALITY` snap requested values to reduce cache fragmentation.
+- [Caching](https://docs-cloudflare-cdn.ciannavei.dev/cache): Cache key layout, `X-Cache` header semantics, non-blocking writes, cache duration.
+- [Releases](https://docs-cloudflare-cdn.ciannavei.dev/releases): All published releases with deploy-to-Cloudflare buttons per version.
+
+## Source
+
+- [GitHub repository](https://github.com/FrancescoCiannavei/cloudflare-worker-image-cdn)
+- [GitHub releases](https://github.com/FrancescoCiannavei/cloudflare-worker-image-cdn/releases)
