@@ -1,0 +1,78 @@
+---
+import Layout from "../layouts/Layout.astro";
+---
+
+<Layout title="Roadmap - Worker Image CDN">
+	<h1>Roadmap</h1>
+	<p>Planned and in-progress work for Worker Image CDN.</p>
+
+	<h2>In progress</h2>
+	<ul class="roadmap">
+		<li>
+			<strong>Admin</strong>
+			<span class="status wip">WIP</span>
+			<p>Admin features to clear cache, view cache, update package, etc.</p>
+		</li>
+	</ul>
+
+	<h2>Planned</h2>
+	<ul class="roadmap">
+		<li>
+			<strong>SEO features</strong>
+			<span class="status planned">Planned</span>
+			<p>Ability to add things like <code>robots.txt</code></p>
+		</li>
+		<li>
+			<strong>Additional output formats</strong>
+			<span class="status planned">Planned</span>
+			<p>Broader format coverage beyond AVIF and WebP.</p>
+		</li>
+	</ul>
+</Layout>
+
+<style lang="scss">
+	@use "../style/vars" as *;
+
+	.roadmap {
+		display: flex;
+		flex-direction: column;
+		gap: 16px;
+		list-style: none;
+		padding: 0;
+		margin-top: 16px;
+
+		li {
+			border: 1px solid $borderCol;
+			border-radius: 8px;
+			padding: 16px 20px;
+			background: rgba(#fff, 0.02);
+		}
+
+		p {
+			margin: 8px 0 0;
+			color: $textSecondary;
+			font-size: 0.9rem;
+		}
+	}
+
+	.status {
+		display: inline-block;
+		margin-left: 8px;
+		font-size: 0.65rem;
+		font-weight: 600;
+		text-transform: uppercase;
+		letter-spacing: 0.05em;
+		padding: 2px 6px;
+		border-radius: 4px;
+
+		&.wip {
+			background: rgba($mainCol, 0.15);
+			color: $mainCol;
+		}
+
+		&.planned {
+			background: rgba(#fff, 0.08);
+			color: $textSecondary;
+		}
+	}
+</style>

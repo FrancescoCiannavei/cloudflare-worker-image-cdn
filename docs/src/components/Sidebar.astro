@@ -17,12 +17,14 @@ const sections = [
 			{ label: "Quality", href: "/quality" },
 			{ label: "Steps", href: "/steps" },
 			{ label: "Caching", href: "/cache" },
+			{ label: "Admin" },
 		],
 	},
 	{
 		title: "Project",
 		links: [
 			{ label: "Releases", href: "/releases" },
+			{ label: "Roadmap", href: "/roadmap" },
 		],
 	},
 ];
@@ -35,9 +37,16 @@ const sections = [
 			<ul>
 				{section.links.map((link) => (
 					<li>
-						<a href={link.href} class:list={[{ active: currentPath === link.href }]}>
-							{link.label}
-						</a>
+						{link.href ? (
+							<a href={link.href} class:list={[{ active: currentPath === link.href }]}>
+								{link.label}
+							</a>
+						) : (
+							<span class="wip-item">
+								{link.label}
+								<span class="wip-tag">WIP</span>
+							</span>
+						)}
 					</li>
 				))}
 			</ul>
@@ -99,5 +108,28 @@ const sections = [
 			color: $mainCol;
 			background: rgba($mainCol, 0.1);
 		}
+	}
+
+	.wip-item {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		gap: 8px;
+		padding: 8px 12px;
+		border-radius: 6px;
+		color: rgba($textSecondary, 0.5);
+		font-size: 0.875rem;
+		cursor: not-allowed;
+	}
+
+	.wip-tag {
+		font-size: 0.625rem;
+		font-weight: 600;
+		text-transform: uppercase;
+		letter-spacing: 0.05em;
+		padding: 2px 6px;
+		border-radius: 4px;
+		background: rgba($mainCol, 0.15);
+		color: $mainCol;
 	}
 </style>
