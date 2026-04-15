@@ -1,6 +1,34 @@
 ---
 import Layout from "../layouts/Layout.astro";
+import { Marked } from "marked";
 import { fetchReleases, deployUrl, REPO_URL } from "../lib/releases";
+
+const marked = new Marked({ gfm: true, breaks: false });
+
+marked.use({
+	renderer: {
+		link({ href, title, tokens }) {
+			const text = this.parser.parseInline(tokens);
+			const titleAttr = title ? ` title="${title}"` : "";
+			return `<a href="${href}"${titleAttr} target="_blank" rel="noopener">${text}</a>`;
+		},
+	},
+});
+
+const MENTION_RE = /(^|[^\w`/])@([a-zA-Z0-9](?:[a-zA-Z0-9-]{0,38}[a-zA-Z0-9])?)\b/g;
+function linkifyMentions(html: string): string {
+	return html.replace(
+		/(<code[^>]*>[\s\S]*?<\/code>|<a[\s\S]*?<\/a>)|([^<]+)/g,
+		(_m, skip, text) => {
+			if (skip) return skip;
+			return text.replace(
+				MENTION_RE,
+				(_: string, pre: string, user: string) =>
+					`${pre}<a href="https://github.com/${user}" target="_blank" rel="noopener">@${user}</a>`,
+			);
+		},
+	);
+}
 
 const result = await fetchReleases();
 const releases = result.ok ? result.releases : [];
@@ -46,7 +74,7 @@ const dateFormatter = new Intl.DateTimeFormat("en-US", {
 						)}
 					</div>
 					{release.body && (
-						<pre class="release-body">{release.body}</pre>
+						<div class="release-body" set:html={linkifyMentions(marked.parse(release.body) as string)} />
 					)}
 					<a
 						class="deploy-button"
@@ -139,16 +167,61 @@ const dateFormatter = new Intl.DateTimeFormat("en-US", {
 	}
 
 	.release-body {
-		margin: 0;
 		padding: 12px 16px;
 		background: rgba(#000, 0.25);
 		border-radius: 6px;
 		font-size: 0.85rem;
 		color: $textSecondary;
-		white-space: pre-wrap;
-		word-wrap: break-word;
-		font-family: inherit;
 		line-height: 1.5;
+
+		:global(p) {
+			margin: 0 0 0.75em;
+		}
+
+		:global(p:last-child),
+		:global(ul:last-child),
+		:global(ol:last-child) {
+			margin-bottom: 0;
+		}
+
+		:global(h1),
+		:global(h2),
+		:global(h3),
+		:global(h4) {
+			margin: 1em 0 0.5em;
+			color: $textPrimary;
+			font-size: 1rem;
+		}
+
+		:global(ul),
+		:global(ol) {
+			margin: 0 0 0.75em;
+			padding-left: 1.25em;
+		}
+
+		:global(code) {
+			padding: 1px 5px;
+			border-radius: 3px;
+			background: rgba(#fff, 0.06);
+			font-size: 0.85em;
+		}
+
+		:global(pre) {
+			margin: 0 0 0.75em;
+			padding: 10px 12px;
+			border-radius: 4px;
+			background: rgba(#000, 0.35);
+			overflow-x: auto;
+
+			code {
+				padding: 0;
+				background: transparent;
+			}
+		}
+
+		:global(a) {
+			color: $mainCol;
+		}
 	}
 
 	.error {
