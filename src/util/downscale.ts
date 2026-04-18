@@ -9,6 +9,13 @@
  */
 import { PhotonImage, resize, SamplingFilter } from "@cf-wasm/photon";
 
+// Upper bound on source image size that photon can decode without blowing the
+// worker's 128MB heap. Photon's WASM linear memory doesn't shrink after .free(),
+// so the decoded raster high-water (width × height × 4 bytes for RGBA) stays
+// reserved for the isolate's lifetime. 3MP ≈ 12MB of raster, leaving room for
+// the resize target, PNG re-encode, and WIO's separate WASM instance.
+export const PHOTON_MAX_SOURCE_PIXELS = 3_000_000;
+
 export function downscale(
 	imageBytes: Uint8Array,
 	width: number,
