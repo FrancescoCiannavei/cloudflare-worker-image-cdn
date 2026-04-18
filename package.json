@@ -19,6 +19,7 @@
 		"test": "jest"
 	},
 	"dependencies": {
+		"@cf-wasm/photon": "^0.3.4",
 		"typescript": "^6.0.2",
 		"wasm-image-optimization": "^2.0.7",
 		"wrangler": "^4.81.0"

@@ -1,0 +1,19 @@
+name: Purge R2 Cache
+
+on:
+  release:
+    types: [published]
+
+jobs:
+  purge:
+    runs-on: ubuntu-latest
+    name: Purge worker-cdn-images bucket
+    steps:
+      - name: Empty R2 bucket
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
+          AWS_DEFAULT_REGION: auto
+          R2_ENDPOINT: https://${{ secrets.CLOUDFLARE_ACCOUNT_ID }}.r2.cloudflarestorage.com
+        run: |
+          aws s3 rm s3://worker-cdn-images --recursive --endpoint-url "$R2_ENDPOINT"
