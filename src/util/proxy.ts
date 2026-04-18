@@ -2,7 +2,7 @@
  * Util to proxy requests to the origin server
  */
 import { optimizeImage, type OptimizeParams } from "wasm-image-optimization/workerd";
-import { getBestFormat, getContentType, type ImageFormat } from "./convert";
+import { canEncode, getBestFormat, getContentType, type ImageFormat } from "./convert";
 import { computeDimensions } from "./resize";
 import { getImageDimensions } from "./dimensions";
 import { getCachedImage, putCachedImage } from "./cache";
@@ -115,6 +115,21 @@ export async function proxyRequest(
 			return passthrough(new Response(imageData, {
 				headers: { "Content-Type": contentType },
 			}));
+		}
+
+		// If the target is too big for WIO to encode within the worker's memory
+		// budget, skip the encoder entirely and serve origin bytes. Only safe
+		// outcome for full-res 4K+ requests — both AVIF and WebP blow the heap
+		// at that resolution.
+		if (targetW !== undefined && targetH !== undefined && !canEncode(targetW, targetH)) {
+			return new Response(imageData, {
+				status: 200,
+				headers: {
+					"Content-Type": contentType,
+					"Cache-Control": "public, max-age=86400",
+					"X-Cache": "BYPASS",
+				},
+			});
 		}
 
 		const options: OptimizeParams = {
