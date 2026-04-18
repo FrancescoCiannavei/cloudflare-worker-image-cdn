@@ -7,6 +7,7 @@ import { computeDimensions } from "./resize";
 import { getImageDimensions } from "./dimensions";
 import { getCachedImage, putCachedImage } from "./cache";
 import { parseSteps, snapToStep } from "./steps";
+import { downscale } from "./downscale";
 
 function passthrough(response: Response): Response {
 	return new Response(response.body, {
@@ -116,21 +117,26 @@ export async function proxyRequest(
 			}));
 		}
 
-		// Build optimizeImage options
+		// If a downscale is needed, do it with photon (Lanczos3) and hand the
+		// resized raster to optimizeImage as PNG for encoding only. Skia's
+		// internal resize (the default in wasm-image-optimization) aliases
+		// badly on diagonals, so we deliberately bypass it.
+		let encoderInput: Uint8Array | ArrayBuffer = imageData;
+		if (
+			dims
+			&& targetW !== undefined
+			&& targetH !== undefined
+			&& (targetW < dims.width || targetH < dims.height)
+		) {
+			encoderInput = downscale(new Uint8Array(imageData), targetW, targetH);
+		}
+
 		const options: OptimizeParams = {
-			image: imageData,
+			image: encoderInput,
 			format,
 			quality,
-			speed: 10,
+			speed: 0,
 		};
-
-		// Apply resize if it would actually downscale (never upscale)
-		if (dims && targetW !== undefined && targetH !== undefined) {
-			if (targetW < dims.width || targetH < dims.height) {
-				options.width = targetW;
-				options.height = targetH;
-			}
-		}
 
 		// Try requested format, fall back to WebP if AVIF blows memory
 		let converted: Uint8Array;
@@ -141,7 +147,7 @@ export async function proxyRequest(
 			if (format === "avif") {
 				outputFormat = "webp";
 				options.format = "webp";
-				options.speed = 10;
+				options.speed = 0;
 				converted = (await optimizeImage(options)).data;
 			} else {
 				return passthrough(new Response(imageData, {
