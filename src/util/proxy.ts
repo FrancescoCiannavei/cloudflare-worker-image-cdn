@@ -135,7 +135,7 @@ export async function proxyRequest(
 			image: encoderInput,
 			format,
 			quality,
-			speed: 0,
+			speed: 10,
 		};
 
 		// Try requested format, fall back to WebP if AVIF blows memory
@@ -147,7 +147,7 @@ export async function proxyRequest(
 			if (format === "avif") {
 				outputFormat = "webp";
 				options.format = "webp";
-				options.speed = 0;
+				options.speed = 10;
 				converted = (await optimizeImage(options)).data;
 			} else {
 				return passthrough(new Response(imageData, {
