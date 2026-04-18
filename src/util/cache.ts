@@ -27,7 +27,6 @@ export async function getCachedImage(
 	format: ImageFormat,
 	params: CacheParams,
 ): Promise<{ data: ReadableStream; contentType: string } | null> {
-	return null; // TODO: remove this line, we're disabling cache for testing
 	const key = buildCacheKey(pathname, format, params);
 	const object = await bucket.get(key);
 
