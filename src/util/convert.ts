@@ -4,10 +4,27 @@
 
 export type ImageFormat = "avif" | "webp";
 
-// Empirically-derived ceiling for AVIF encoding on a 128MB Worker.
-// aom peak ≈ pixel_count × ~13 bytes + ~20MB baseline; 5MP leaves headroom
-// for fragmentation and encoder variance.
-export const MAX_AVIF_PIXELS = 5_000_000;
+// Ceiling for AVIF encoding on a 128MB Worker, derived from the libaom memory
+// model. Peak ≈ pixel_count × AVIF_BYTES_PER_PIXEL + encoder baseline, on top
+// of the rest of the runtime. Downscales route through a separate photon WASM
+// instance whose linear memory doesn't shrink after free, so its high-water
+// reservation sticks around for the lifetime of the isolate.
+const WORKER_MEMORY_LIMIT_MB = 128;
+const JS_RUNTIME_OVERHEAD_MB = 30;
+const PHOTON_WASM_OVERHEAD_MB = 35;
+const AVIF_ENCODER_BASELINE_MB = 20;
+const ENCODER_HEADROOM_MB = 5;
+const AVIF_BYTES_PER_PIXEL = 13;
+
+const avifEncoderWorkspaceBytes = (
+	WORKER_MEMORY_LIMIT_MB
+	- JS_RUNTIME_OVERHEAD_MB
+	- PHOTON_WASM_OVERHEAD_MB
+	- AVIF_ENCODER_BASELINE_MB
+	- ENCODER_HEADROOM_MB
+) * 1_000_000;
+
+export const MAX_AVIF_PIXELS = Math.floor(avifEncoderWorkspaceBytes / AVIF_BYTES_PER_PIXEL);
 
 export function canEncodeAvif(width: number, height: number): boolean {
 	return width * height <= MAX_AVIF_PIXELS;

@@ -7,7 +7,7 @@ import { computeDimensions } from "./resize";
 import { getImageDimensions } from "./dimensions";
 import { getCachedImage, putCachedImage } from "./cache";
 import { parseSteps, snapToStep } from "./steps";
-import { downscale } from "./downscale";
+import { downscale, PHOTON_MAX_SOURCE_PIXELS } from "./downscale";
 
 function passthrough(response: Response): Response {
 	return new Response(response.body, {
@@ -117,26 +117,32 @@ export async function proxyRequest(
 			}));
 		}
 
-		// If a downscale is needed, do it with photon (Lanczos3) and hand the
-		// resized raster to optimizeImage as PNG for encoding only. Skia's
-		// internal resize (the default in wasm-image-optimization) aliases
-		// badly on diagonals, so we deliberately bypass it.
-		let encoderInput: Uint8Array | ArrayBuffer = imageData;
+		const options: OptimizeParams = {
+			image: imageData,
+			format,
+			quality,
+			speed: 10,
+		};
+
+		// Route downscales through photon (Lanczos3) when the source is small
+		// enough to fit in photon's WASM heap — a 4K source alone is a ~33MB
+		// raw raster, and linear memory doesn't shrink after .free(), so large
+		// sources OOM the worker. Above the cap we fall back to WIO's skia
+		// resize: aliased, but memory-safe, and visibly less bad at the extreme
+		// downscale ratios that hit this path.
 		if (
 			dims
 			&& targetW !== undefined
 			&& targetH !== undefined
 			&& (targetW < dims.width || targetH < dims.height)
 		) {
-			encoderInput = downscale(new Uint8Array(imageData), targetW, targetH);
+			if (dims.width * dims.height <= PHOTON_MAX_SOURCE_PIXELS) {
+				options.image = downscale(new Uint8Array(imageData), targetW, targetH);
+			} else {
+				options.width = targetW;
+				options.height = targetH;
+			}
 		}
-
-		const options: OptimizeParams = {
-			image: encoderInput,
-			format,
-			quality,
-			speed: 10,
-		};
 
 		// Try requested format, fall back to WebP if AVIF blows memory
 		let converted: Uint8Array;
