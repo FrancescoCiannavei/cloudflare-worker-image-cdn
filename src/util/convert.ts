@@ -30,12 +30,12 @@ export function canEncodeAvif(width: number, height: number): boolean {
 	return width * height <= MAX_AVIF_PIXELS;
 }
 
-// Upper bound on target pixels we'll run through *any* encoder. Above this we
-// serve origin bytes unchanged: libwebp at full 4K (8.3 MP) needs the decoded
-// raster (~4 bytes/pixel) plus encoder workspace (~10 bytes/pixel for
-// method=6, high quality), which tips the worker over its memory limit even
-// without the AVIF path. No photon overhead here because the oversized-target
-// path doesn't hit photon either way.
+// Upper bound on target pixels we'll run through *any* encoder. Above this
+// we serve origin bytes unchanged. Derived from the libwebp method=6 memory
+// model: 4 B/px decoded RGBA + 1.5 B/px YUV 4:2:0 planes + 2 B/px DCT
+// coefficients + ~1.5 B/px macroblock metadata & filter buffers ≈ 9 B/px.
+// No photon overhead subtracted - the oversized-target path skips photon
+// either way.
 const WEBP_BYTES_PER_PIXEL = 9;
 
 const webpEncodeWorkspaceBytes = (
@@ -45,7 +45,7 @@ const webpEncodeWorkspaceBytes = (
 ) * 1_000_000;
 
 export const MAX_ENCODE_PIXELS = Math.floor(webpEncodeWorkspaceBytes / WEBP_BYTES_PER_PIXEL);
-console.log(MAX_ENCODE_PIXELS)
+
 export function canEncode(width: number, height: number): boolean {
 	return width * height <= MAX_ENCODE_PIXELS;
 }

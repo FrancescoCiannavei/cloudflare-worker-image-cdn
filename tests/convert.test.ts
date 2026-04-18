@@ -1,5 +1,7 @@
 import {
 	MAX_AVIF_PIXELS,
+	MAX_ENCODE_PIXELS,
+	canEncode,
 	canEncodeAvif,
 	getBestFormat,
 	getContentType,
@@ -7,16 +9,34 @@ import {
 
 describe("canEncodeAvif", () => {
 	it("accepts images at the pixel ceiling", () => {
-		expect(canEncodeAvif(2500, 2000)).toBe(true); // 5,000,000 px
 		expect(canEncodeAvif(MAX_AVIF_PIXELS, 1)).toBe(true);
 	});
 
 	it("rejects images over the ceiling", () => {
-		expect(canEncodeAvif(2500, 2001)).toBe(false);
+		expect(canEncodeAvif(MAX_AVIF_PIXELS + 1, 1)).toBe(false);
 	});
 
 	it("accepts small images", () => {
 		expect(canEncodeAvif(100, 100)).toBe(true);
+	});
+});
+
+describe("canEncode", () => {
+	it("accepts images at the encode ceiling", () => {
+		expect(canEncode(MAX_ENCODE_PIXELS, 1)).toBe(true);
+	});
+
+	it("rejects images over the encode ceiling", () => {
+		expect(canEncode(MAX_ENCODE_PIXELS + 1, 1)).toBe(false);
+	});
+
+	it("accepts 4K (3840x2160)", () => {
+		// 8.29 MP — must fit, otherwise the whole point of the WebP ceiling is moot.
+		expect(canEncode(3840, 2160)).toBe(true);
+	});
+
+	it("has a wider ceiling than AVIF", () => {
+		expect(MAX_ENCODE_PIXELS).toBeGreaterThan(MAX_AVIF_PIXELS);
 	});
 });
 
