@@ -1,9 +1,9 @@
 ---
-import Layout from "../layouts/Layout.astro";
+import Layout from '../layouts/Layout.astro';
 ---
 
 <style lang="scss">
-	@use "../style/vars" as *;
+	@use '../style/vars' as *;
 
 	.deploy-badge {
 		display: inline-block;
@@ -15,6 +15,132 @@ import Layout from "../layouts/Layout.astro";
 
 		&:hover img {
 			opacity: 0.85;
+		}
+	}
+
+	.pagespeed {
+		display: inline-flex;
+		align-items: center;
+		gap: 24px;
+		margin: 16px 0;
+		padding: 14px 24px;
+		border: 1px solid $borderCol;
+		border-radius: 8px;
+		background: $bgCard;
+
+		.item {
+			display: flex;
+			flex-direction: column;
+			align-items: center;
+			gap: 6px;
+		}
+
+		.score {
+			position: relative;
+			display: flex;
+			align-items: center;
+			justify-content: center;
+			width: 72px;
+			height: 72px;
+			border-radius: 50%;
+			font-size: 1.6rem;
+			font-weight: 700;
+			line-height: 1;
+
+			&::before {
+				content: '';
+				position: absolute;
+				inset: 4px;
+				border-radius: 50%;
+				background: $bgCard;
+			}
+
+			span {
+				position: relative;
+			}
+		}
+
+		.score.bad {
+			background: conic-gradient(#ff4e42 0 42%, rgba(255, 78, 66, 0.18) 42% 100%);
+			color: #ff4e42;
+		}
+
+		.score.good {
+			background: conic-gradient(#0cce6b 0 100%, rgba(12, 206, 107, 0.18) 0);
+			color: #0cce6b;
+		}
+
+		.label {
+			color: $textSecondary;
+			font-size: 0.8rem;
+			letter-spacing: 0.04em;
+			text-transform: uppercase;
+		}
+
+		.arrow {
+			color: $textSecondary;
+			font-size: 1.4rem;
+			line-height: 1;
+		}
+	}
+
+	.bandwidth {
+		margin: 16px 0;
+		display: flex;
+		flex-direction: column;
+		gap: 12px;
+
+		.row {
+			display: flex;
+			align-items: center;
+			gap: 10px;
+			padding: 10px 14px;
+			border: 1px solid $borderCol;
+			border-radius: 8px;
+			background: $bgCard;
+			font-size: 0.9rem;
+			flex-wrap: wrap;
+		}
+
+		.row-label {
+			min-width: 110px;
+			color: $textSecondary;
+			font-size: 0.75rem;
+			letter-spacing: 0.04em;
+			text-transform: uppercase;
+		}
+
+		.node {
+			padding: 6px 12px;
+			border: 1px solid $borderCol;
+			border-radius: 6px;
+			color: $textPrimary;
+			white-space: nowrap;
+		}
+
+		.pipe {
+			display: inline-flex;
+			align-items: center;
+			gap: 6px;
+			color: $textSecondary;
+		}
+
+		.bytes {
+			padding: 4px 10px;
+			border-radius: 999px;
+			font-weight: 600;
+			font-size: 0.85rem;
+			white-space: nowrap;
+		}
+
+		.bytes.heavy {
+			background: rgba(255, 78, 66, 0.15);
+			color: #ff4e42;
+		}
+
+		.bytes.light {
+			background: rgba(12, 206, 107, 0.15);
+			color: #0cce6b;
 		}
 	}
 
@@ -51,15 +177,79 @@ import Layout from "../layouts/Layout.astro";
 	}
 </style>
 
-<Layout title="Introduction - Worker Image CDN" description="A Cloudflare Worker image CDN proxy that converts, resizes, and caches images in R2 for fast, on-the-fly delivery.">
+<Layout
+	title="Introduction - Worker Image CDN"
+	description="A Cloudflare Worker image CDN proxy that converts, resizes, and caches images in R2 for fast, on-the-fly delivery."
+>
 	<h1>Worker Image CDN</h1>
-	<p>A Cloudflare Worker that acts as an image CDN proxy. It fetches images from an origin server, automatically converts them to modern formats, resizes them on the fly, and caches the results in R2 for fast subsequent delivery.</p>
+	<p>
+		A Cloudflare Worker that acts as an image CDN proxy. It fetches images from an origin server, automatically converts them to modern
+		formats, resizes them on the fly, and caches the results in R2 for fast subsequent delivery.
+	</p>
 
-	<p>It runs entirely on Cloudflare's edge — no servers to manage, no build step per image.</p>
+	<p>It runs entirely on Cloudflare's edge - no servers to manage, no build step per image.</p>
 	<p>
 		<a class="deploy-badge" href="/setup">
 			<img src="/images/deploy-to-cloudflare.svg" alt="Deploy to Cloudflare" width="240" />
 		</a>
+	</p>
+
+	<h2>Why do I need this CDN?</h2>
+	<h3>Make your app faster</h3>
+	<p>
+		Images are typically the largest resource on a page and one of the biggest drivers of slow load times. That hurts user experience
+		directly, and because Google uses Core Web Vitals (especially Largest Contentful Paint, which is usually an image) as a ranking signal,
+		it hurts SEO too. Serving AVIF / WebP at the right dimensions from the edge cuts LCP dramatically.
+	</p>
+	<div class="pagespeed">
+		<div class="item">
+			<div class="score bad"><span>42</span></div>
+			<div class="label">Before</div>
+		</div>
+		<div class="arrow">→</div>
+		<div class="item">
+			<div class="score good"><span>100</span></div>
+			<div class="label">After</div>
+		</div>
+	</div>
+
+
+	<h3>Reduce bandwidth on both ends</h3>
+	<p>
+		Modern formats and on-the-fly resizing mean clients download a fraction of the bytes, and your origin stops re-serving the same
+		oversized originals - transformed variants are cached in R2 and served from Cloudflare's edge.
+	</p>
+	<div class="bandwidth">
+		<div class="row">
+			<span class="row-label">Without CDN</span>
+			<span class="node">Origin</span>
+			<span class="pipe">→ <span class="bytes heavy">2.4 MB JPEG</span> →</span>
+			<span class="node">Browser</span>
+		</div>
+		<div class="row">
+			<span class="row-label">With CDN</span>
+			<span class="node">Origin</span>
+			<span class="pipe">→ <span class="bytes light">cached once</span> →</span>
+			<span class="node">Edge (R2)</span>
+			<span class="pipe">→ <span class="bytes light">180 KB AVIF</span> →</span>
+			<span class="node">Browser</span>
+		</div>
+	</div>
+
+	<h3>It's free to run</h3>
+	<p>
+		The Worker and R2 bucket both sit comfortably inside Cloudflare's free tier for most small-to-medium sites, and R2 egress is free by
+		default.
+	</p>
+	<p>
+		<small
+			>Free tier ceilings (at the time of writing): Workers allow 100,000 requests/day, and R2 gives you 10&nbsp;GB of storage,
+			1&nbsp;million Class&nbsp;A operations/month, and 10&nbsp;million Class&nbsp;B operations/month. If you outgrow them, the Workers Paid
+			plan ($5/month) raises request limits substantially, and R2 storage and operations continue on usage-based pricing. Check <a
+				href="https://developers.cloudflare.com/workers/platform/pricing/"
+				target="_blank"
+				rel="noopener">Workers pricing</a
+			> and <a href="https://developers.cloudflare.com/r2/pricing/#free-tier" target="_blank" rel="noopener">R2 pricing</a> for current numbers.</small>
 	</p>
 
 	<h2>Features</h2>
