@@ -30,7 +30,7 @@ const sections = [
 ];
 ---
 
-<aside class="sidebar">
+<aside class="sidebar" id="sidebar">
 	{sections.map((section) => (
 		<div class="section">
 			<span class="section-title">{section.title}</span>
@@ -67,6 +67,18 @@ const sections = [
 		border-right: 1px solid $borderCol;
 		padding: 24px 16px;
 		overflow-y: auto;
+		z-index: 90;
+		transition: transform 0.2s ease;
+	}
+
+	@media (max-width: 768px) {
+		.sidebar {
+			transform: translateX(-100%);
+		}
+
+		:global(body.sidebar-open) .sidebar {
+			transform: translateX(0);
+		}
 	}
 
 	.section {

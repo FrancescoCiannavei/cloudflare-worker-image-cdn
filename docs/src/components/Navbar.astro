@@ -3,10 +3,17 @@ const currentPath = Astro.url.pathname;
 ---
 
 <header class="navbar">
-	<a href="/" class="logo">
-		<span class="logo-icon">CDN</span>
-		<span class="logo-text">Worker Image CDN</span>
-	</a>
+	<div class="left">
+		<button class="menu-toggle" aria-label="Toggle navigation" aria-controls="sidebar" aria-expanded="false">
+			<span class="bar"></span>
+			<span class="bar"></span>
+			<span class="bar"></span>
+		</button>
+		<a href="/" class="logo">
+			<span class="logo-icon">CDN</span>
+			<span class="logo-text">Worker Image CDN</span>
+		</a>
+	</div>
 	<nav>
 		<a href="https://github.com/francescociannavei/cloudflare-worker-image-cdn" target="_blank" rel="noopener">
 			GitHub
@@ -31,6 +38,47 @@ const currentPath = Astro.url.pathname;
 		justify-content: space-between;
 		padding: 0 $siteSpacing;
 		z-index: 100;
+	}
+
+	.left {
+		display: flex;
+		align-items: center;
+		gap: 12px;
+	}
+
+	.menu-toggle {
+		display: none;
+		flex-direction: column;
+		justify-content: center;
+		gap: 4px;
+		width: 36px;
+		height: 36px;
+		padding: 0;
+		border: 1px solid $borderCol;
+		border-radius: 6px;
+		background: transparent;
+		cursor: pointer;
+
+		.bar {
+			display: block;
+			width: 18px;
+			height: 2px;
+			margin: 0 auto;
+			background: $textPrimary;
+			transition: transform 0.2s, opacity 0.2s;
+		}
+	}
+
+	:global(body.sidebar-open) .menu-toggle {
+		.bar:nth-child(1) {
+			transform: translateY(6px) rotate(45deg);
+		}
+		.bar:nth-child(2) {
+			opacity: 0;
+		}
+		.bar:nth-child(3) {
+			transform: translateY(-6px) rotate(-45deg);
+		}
 	}
 
 	.logo {
@@ -64,6 +112,16 @@ const currentPath = Astro.url.pathname;
 
 		&:hover {
 			color: #fff;
+		}
+	}
+
+	@media (max-width: 768px) {
+		.menu-toggle {
+			display: flex;
+		}
+
+		.logo-text {
+			display: none;
 		}
 	}
 </style>

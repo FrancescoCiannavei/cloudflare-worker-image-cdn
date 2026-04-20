@@ -144,8 +144,14 @@ import Layout from '../layouts/Layout.astro';
 		}
 	}
 
+	.flow-wrap {
+		overflow-x: auto;
+		-webkit-overflow-scrolling: touch;
+		margin: 24px 0;
+	}
+
 	.flow {
-		margin: 24px auto;
+		margin: 0 auto;
 		border-collapse: separate;
 		border-spacing: 20px 0;
 		width: auto;
@@ -213,7 +219,6 @@ import Layout from '../layouts/Layout.astro';
 		</div>
 	</div>
 
-
 	<h3>Reduce bandwidth on both ends</h3>
 	<p>
 		Modern formats and on-the-fly resizing mean clients download a fraction of the bytes, and your origin stops re-serving the same
@@ -249,7 +254,8 @@ import Layout from '../layouts/Layout.astro';
 				href="https://developers.cloudflare.com/workers/platform/pricing/"
 				target="_blank"
 				rel="noopener">Workers pricing</a
-			> and <a href="https://developers.cloudflare.com/r2/pricing/#free-tier" target="_blank" rel="noopener">R2 pricing</a> for current numbers.</small>
+			> and <a href="https://developers.cloudflare.com/r2/pricing/#free-tier" target="_blank" rel="noopener">R2 pricing</a> for current numbers.</small
+		>
 	</p>
 
 	<h2>Features</h2>
@@ -289,27 +295,29 @@ import Layout from '../layouts/Layout.astro';
 	</table>
 
 	<h2>How it works</h2>
-	<table class="flow">
-		<tbody>
-			<tr><td class="node" colspan="2">Request</td></tr>
-			<tr><td class="arrow" colspan="2">↓</td></tr>
-			<tr><td class="node" colspan="2">Check R2 cache</td></tr>
-			<tr>
-				<td class="arrow">HIT&nbsp;&nbsp;↙</td>
-				<td class="arrow">↘&nbsp;&nbsp;MISS</td>
-			</tr>
-			<tr>
-				<td class="node">Serve cached image</td>
-				<td class="node">Fetch from origin</td>
-			</tr>
-			<tr><td></td><td class="arrow">↓</td></tr>
-			<tr><td></td><td class="node">Resize (if requested)</td></tr>
-			<tr><td></td><td class="arrow">↓</td></tr>
-			<tr><td></td><td class="node">Convert to AVIF / WebP</td></tr>
-			<tr><td></td><td class="arrow">↓</td></tr>
-			<tr><td></td><td class="node">Store in R2</td></tr>
-			<tr><td></td><td class="arrow">↓</td></tr>
-			<tr><td></td><td class="node">Serve image</td></tr>
-		</tbody>
-	</table>
+	<div class="flow-wrap">
+		<table class="flow">
+			<tbody>
+				<tr><td class="node" colspan="2">Request</td></tr>
+				<tr><td class="arrow" colspan="2">↓</td></tr>
+				<tr><td class="node" colspan="2">Check R2 cache</td></tr>
+				<tr>
+					<td class="arrow">HIT&nbsp;&nbsp;↙</td>
+					<td class="arrow">↘&nbsp;&nbsp;MISS</td>
+				</tr>
+				<tr>
+					<td class="node">Serve cached image</td>
+					<td class="node">Fetch from origin</td>
+				</tr>
+				<tr><td></td><td class="arrow">↓</td></tr>
+				<tr><td></td><td class="node">Resize (if requested)</td></tr>
+				<tr><td></td><td class="arrow">↓</td></tr>
+				<tr><td></td><td class="node">Convert to AVIF / WebP</td></tr>
+				<tr><td></td><td class="arrow">↓</td></tr>
+				<tr><td></td><td class="node">Store in R2</td></tr>
+				<tr><td></td><td class="arrow">↓</td></tr>
+				<tr><td></td><td class="node">Serve image</td></tr>
+			</tbody>
+		</table>
+	</div>
 </Layout>

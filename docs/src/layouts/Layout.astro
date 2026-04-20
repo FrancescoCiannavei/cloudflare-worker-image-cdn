@@ -35,6 +35,7 @@ const canonical = new URL(Astro.url.pathname, Astro.site).toString();
 	<body>
 		<Navbar />
 		<Sidebar />
+		<div class="sidebar-overlay" data-sidebar-overlay></div>
 		<main>
 			<slot />
 			<footer>
@@ -44,6 +45,35 @@ const canonical = new URL(Astro.url.pathname, Astro.site).toString();
 	</body>
 </html>
 
+<script>
+	const toggle = document.querySelector<HTMLButtonElement>(".menu-toggle");
+	const overlay = document.querySelector<HTMLDivElement>("[data-sidebar-overlay]");
+	const sidebar = document.getElementById("sidebar");
+
+	function close() {
+		document.body.classList.remove("sidebar-open");
+		toggle?.setAttribute("aria-expanded", "false");
+	}
+
+	function open() {
+		document.body.classList.add("sidebar-open");
+		toggle?.setAttribute("aria-expanded", "true");
+	}
+
+	toggle?.addEventListener("click", () => {
+		if (document.body.classList.contains("sidebar-open")) close();
+		else open();
+	});
+
+	overlay?.addEventListener("click", close);
+
+	sidebar?.querySelectorAll("a").forEach((a) => a.addEventListener("click", close));
+
+	window.addEventListener("resize", () => {
+		if (window.innerWidth > 768) close();
+	});
+</script>
+
 <style lang="scss">
 	@use "../style/vars" as *;
 
@@ -52,6 +82,25 @@ const canonical = new URL(Astro.url.pathname, Astro.site).toString();
 		margin-top: $navHeight;
 		padding: 40px 48px;
 		max-width: 800px;
+	}
+
+	.sidebar-overlay {
+		display: none;
+		position: fixed;
+		inset: 0;
+		background: rgba(0, 0, 0, 0.5);
+		z-index: 80;
+	}
+
+	@media (max-width: 768px) {
+		main {
+			margin-left: 0;
+			padding: 24px 20px;
+		}
+
+		:global(body.sidebar-open) .sidebar-overlay {
+			display: block;
+		}
 	}
 
 	footer {
