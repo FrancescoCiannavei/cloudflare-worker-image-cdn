@@ -16,7 +16,7 @@
     "@astrojs/cloudflare": "^13.1.8",
     "@astrojs/sitemap": "^3.7.2",
     "@astrojs/starlight": "^0.38.3",
-    "astro": "^6.1.5",
+    "astro": "^6.1.8",
     "img-comparison-slider": "^8.0.7",
     "marked": "^18.0.0",
     "sass": "^1.99.0"
