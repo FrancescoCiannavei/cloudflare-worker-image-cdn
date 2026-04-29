@@ -13,7 +13,7 @@
     "cf:dev": "wrangler dev"
   },
   "dependencies": {
-    "@astrojs/cloudflare": "^13.1.8",
+    "@astrojs/cloudflare": "^13.1.10",
     "@astrojs/sitemap": "^3.7.2",
     "@astrojs/starlight": "^0.38.3",
     "astro": "^6.1.8",
